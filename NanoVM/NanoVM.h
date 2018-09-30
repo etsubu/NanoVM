@@ -4,8 +4,8 @@
 #include <fstream>
 
 #define PAGE_SIZE 4096
-#define OPCODE_MASK  0b11111000
-#define DST_REG_MASK 0b00000111
+#define OPCODE_MASK  0b00011111
+#define DST_REG_MASK 0b11100000
 #define SRC_TYPE	 0b10000000
 #define SRC_SIZE	 0b01100000
 #define DST_MEM		 0b00010000
@@ -67,6 +67,11 @@ enum Opcodes {
 	Memcpy,
 	Memcmp
 };
+
+enum Type {
+	Reg,
+	Immediate
+};
 typedef struct NanoVMCpu{
 	uint64_t registers[10];
 	unsigned char* codeBase;
@@ -92,6 +97,7 @@ public:
 	NanoVM(unsigned char* code, uint64_t size);
 	NanoVM(std::string file);
 	~NanoVM();
+	void printStatus();
 	bool Run();
 private:
 	bool fetch(Instruction &instruction);
