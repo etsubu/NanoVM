@@ -1,0 +1,4 @@
+mov reg0, 5 	;reg0 is now 5
+add reg1, reg0 	;reg1 is now 5
+mov reg2, 3 	;reg2 is now 3
+sub reg0, reg2 	;reg0 is now 2
