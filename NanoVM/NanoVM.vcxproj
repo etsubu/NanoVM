@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="NanoVM.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

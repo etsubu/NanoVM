@@ -1,15 +1,22 @@
 #include "pch.h"
 #include "Mapper.h"
 
+enum Size {
+	Byte = 0b00000000,
+	Short = 0b00100000,
+	Dword = 0b01000000,
+	Qword = 0b01100000
+};
+
 Mapper::Mapper() {
-	registerMap["reg0"] = 0x01;
-	registerMap["reg1"] = 0x02;
-	registerMap["reg2"] = 0x03;
-	registerMap["reg3"] = 0x04;
-	registerMap["reg4"] = 0x05;
-	registerMap["reg5"] = 0x06;
-	registerMap["reg6"] = 0x07;
-	registerMap["esp"]  = 0x08;
+	registerMap["reg0"] = 0x00;
+	registerMap["reg1"] = 0x01;
+	registerMap["reg2"] = 0x02;
+	registerMap["reg3"] = 0x03;
+	registerMap["reg4"] = 0x04;
+	registerMap["reg5"] = 0x05;
+	registerMap["reg6"] = 0x06;
+	registerMap["esp"]  = 0x07;
 
 	opcodeMap["mov"]	= std::make_pair(0, 2);
 	opcodeMap["add"]	= std::make_pair(1, 2);
@@ -22,17 +29,17 @@ Mapper::Mapper() {
 	opcodeMap["ror"]	= std::make_pair(8, 2);
 	opcodeMap["rol"]	= std::make_pair(9, 2);
 	opcodeMap["cmp"]	= std::make_pair(10, 2);
-	opcodeMap["stor"]	= std::make_pair(11, 2);
-	opcodeMap["load"]	= std::make_pair(12, 2);
 
-	opcodeMap["jz"]		= std::make_pair(13, 1);
-	opcodeMap["jnz"]	= std::make_pair(14, 1);
-	opcodeMap["jg"]		= std::make_pair(15, 1);
-	opcodeMap["js"]		= std::make_pair(16, 1);
-	opcodeMap["ip"]		= std::make_pair(17, 1);
+	opcodeMap["jz"]		= std::make_pair(11, 1);
+	opcodeMap["jnz"]	= std::make_pair(12, 1);
+	opcodeMap["jg"]		= std::make_pair(13, 1);
+	opcodeMap["js"]		= std::make_pair(14, 1);
+	opcodeMap["ip"]		= std::make_pair(15, 1);
+	opcodeMap["not"]	= std::make_pair(16, 1);
 
-	opcodeMap["call"]	= std::make_pair(18, 1);
-	opcodeMap["enter"]	= std::make_pair(19, 0);
+	opcodeMap["call"]	= std::make_pair(17, 1);
+	opcodeMap["enter"]	= std::make_pair(18, 0);
+	opcodeMap["leave"]  = std::make_pair(19, 0);
 	opcodeMap["push"]	= std::make_pair(20, 1);
 	opcodeMap["pop"]	= std::make_pair(21, 1);
 	opcodeMap["halt"]	= std::make_pair(22, 0);
@@ -75,13 +82,13 @@ int Mapper::mapImmediate(std::string value, std::vector<unsigned char>& bytes) {
 		uint64_t value64 = std::stoull(value);
 		if (value64 <= UINT8_MAX) {
 			bytes.push_back(static_cast<uint8_t>(value64));
-			return 1;
+			return Byte;
 		}
 		else if (value64 <= UINT16_MAX) {
 			uint16_t value16 = static_cast<uint16_t>(value64);
 			bytes.push_back(static_cast<uint8_t>(value16 >> 8));
 			bytes.push_back(static_cast<uint8_t>(value16));
-			return 2;
+			return Short;
 		}
 		else if (value64 <= UINT32_MAX) {
 			uint32_t value32 = static_cast<uint16_t>(value64);
@@ -89,7 +96,7 @@ int Mapper::mapImmediate(std::string value, std::vector<unsigned char>& bytes) {
 			bytes.push_back(static_cast<uint8_t>(value32 >> 16));
 			bytes.push_back(static_cast<uint8_t>(value32 >> 8));
 			bytes.push_back(static_cast<uint8_t>(value32));
-			return 3;
+			return Dword;
 		}
 		else {
 			bytes.push_back(static_cast<uint8_t>(value64 >> 56));
@@ -100,7 +107,7 @@ int Mapper::mapImmediate(std::string value, std::vector<unsigned char>& bytes) {
 			bytes.push_back(static_cast<uint8_t>(value64 >> 16));
 			bytes.push_back(static_cast<uint8_t>(value64 >> 8));
 			bytes.push_back(static_cast<uint8_t>(value64));
-			return 4;
+			return Qword;
 		}
 	}
 	catch (std::invalid_argument) {
