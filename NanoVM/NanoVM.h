@@ -12,6 +12,14 @@
 #define SRC_MEM		 0b00001000
 #define SRC_REG		 0b00000111
 
+#define STACK_ERROR			0b10000000
+#define IP_ERROR			0b01000000
+#define MEMORY_ACCESS		0b00100000
+
+#define ZERO_FLAG		0b10000000
+#define GREATER_FLAG	0b01000000
+#define SMALLER_FLAG	0b00100000
+
 enum Size {
 	Byte,
 	Short,
@@ -43,25 +51,26 @@ enum Opcodes {
 	Sal,
 	Ror,
 	Rol,
+	Mul,
+	Div,
+	Divi,
 	Cmp,
 
 	Jz,
 	Jnz,
 	Jg,
 	Js,
-	Ip,
 	Not,
+	Inc,
+	Dec,
+	Ret,
 
 	Call,
-	Enter,
-	Leave,
 	Push,
 	Pop,
 	Halt,
-	Syscall,
-	Printf,
-	Outi,
-	Outs,
+	printi,
+	prints,
 	Memfind,
 	Memset,
 	Memcpy,
@@ -100,7 +109,10 @@ public:
 	void printStatus();
 	bool Run();
 private:
+	template<class T> T pop();
+	template<class T> void push(T value);
 	bool fetch(Instruction &instruction);
 	bool execute(Instruction &instruction);
+	unsigned char errorFlag;
 	NanoVMCpu cpu;
 };

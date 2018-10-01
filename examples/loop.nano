@@ -1,0 +1,5 @@
+printi reg0
+add reg0, 1
+cmp reg0, 5
+js -8
+halt

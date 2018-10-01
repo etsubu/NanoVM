@@ -2,4 +2,5 @@ mov reg0, 5 	;reg0 is now 5
 add reg1, reg0 	;reg1 is now 5
 mov reg3, 3
 sub reg0, reg3
+cmp reg0, reg1
 halt

@@ -1,0 +1,15 @@
+;This code will print fibonacci sequence
+;use reg0 and reg1 for storing numbers
+;set reg3 as counter for how many pairs should be printed
+mov reg3, 10
+;set reg1 to 1
+mov reg1, 1
+;label could be placed here
+printi reg0
+add reg0, reg1
+printi reg1
+add reg1, reg0
+dec reg3 ;subtract 1 from reg3
+cmp reg3, reg5 ; compare to 0 (reg5 is initialized as 0)
+jnz -12
+halt
