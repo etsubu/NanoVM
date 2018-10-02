@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Mapper.h" />
+    <ClInclude Include="NanoAssembler.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
