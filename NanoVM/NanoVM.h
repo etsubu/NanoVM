@@ -53,7 +53,7 @@ enum Opcodes {
 	Rol,
 	Mul,
 	Div,
-	Divi,
+	Mod,
 	Cmp,
 
 	Jz,

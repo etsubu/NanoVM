@@ -30,7 +30,7 @@ Mapper::Mapper() {
 	opcodeMap["rol"]	= std::make_pair(9, 2);
 	opcodeMap["mul"]    = std::make_pair(10, 2);
 	opcodeMap["div"]    = std::make_pair(11, 2);
-	opcodeMap["divi"]   = std::make_pair(12, 2);
+	opcodeMap["mod"]    = std::make_pair(12, 2);
 	opcodeMap["cmp"]	= std::make_pair(13, 2);
 
 	opcodeMap["jz"]		= std::make_pair(14, 1);
@@ -64,20 +64,20 @@ bool Mapper::canMapLabel(std::string label, unsigned int instructionIndex, std::
 		labelIndex = labelMap.at(label);
 	}
 	catch (std::out_of_range) {
-		return -1;
+		return false;
 	}
 	if (labelIndex == instructionIndex) {
-		return 1;
+		return true;
 	}
 	if (labelIndex > instructionIndex) {
-		for (int i = instructionIndex + 1; i < labelIndex; i++) {
+		for (int i = instructionIndex; i < labelIndex; i++) {
 			if (!instructions[i].length) {
 				return false;
 			}
 		}
 	}
 	else {
-		for (unsigned int i = instructionIndex - 1; i >= labelIndex; i--) {
+		for (int i = instructionIndex - 1; i >= labelIndex && i > 0; i--) {
 			if (!instructions[i].length) {
 				return false;
 			}
@@ -137,14 +137,18 @@ int Mapper::calculateSizeRequirement(std::string label, unsigned int instruction
 			if (i == 0)
 				break;
 		}
+		delta = -delta;
 	}
-	if (delta <= SCHAR_MAX -1)
-		return sizeof(int8_t);
-	else if (delta <= SHRT_MAX - 1)
-		return sizeof(int16_t);
-	else if (delta <= INT32_MAX - 1)
-		return sizeof(int32_t);
-	return sizeof(int64_t);
+	if (SCHAR_MIN <= delta && delta <= SCHAR_MAX) {
+		return (delta > 0) ? (sizeof(int8_t) + 2) : sizeof(int8_t);
+	}
+	else if (SHRT_MIN <= delta && delta <= SHRT_MAX) {
+		return (delta > 0) ? (sizeof(int16_t) + 2) : sizeof(int16_t);
+	}
+	else if (INT32_MIN <= delta && delta <= INT32_MAX) {
+		return (delta > 0) ? (sizeof(int32_t) + 2) : sizeof(int32_t);
+	}
+	return (delta > 0) ? (2 + sizeof(int64_t)) : sizeof(int64_t);
 }
 
 unsigned int Mapper::mapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, unsigned int> labelMap, std::vector<Instruction> &instructions, int64_t &value) {
@@ -201,20 +205,21 @@ unsigned int Mapper::mapLabel(std::string label, unsigned int instructionIndex, 
 		delta = -delta;
 	}
 	value = delta;
+	std::cout << "delta " << delta << std::endl;
 	if (instructions[instructionIndex].length)
 		return instructions[instructionIndex].length - 2;
 	if (SCHAR_MIN <= value && value <= SCHAR_MAX) {
-		if (delta)
-			value -= sizeof(int64_t) - sizeof(int8_t);
+		if (delta > 0)
+			value -= (sizeof(int64_t) - sizeof(int8_t));
 		return sizeof(int8_t);
 	}
 	else if (SHRT_MIN <= value && value <= SHRT_MAX - 1) {
-		if (delta)
+		if (delta > 0)
 			value -= sizeof(int16_t) - sizeof(int8_t);
 		return sizeof(int16_t);
 	}
 	else if (INT32_MIN <= value && value <= INT32_MAX - 1) {
-		if (delta)
+		if (delta > 0)
 			value -= sizeof(int32_t) - sizeof(int8_t);
 		return sizeof(int32_t);
 	}

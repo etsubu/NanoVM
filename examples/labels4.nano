@@ -1,0 +1,13 @@
+mov reg0, 10
+:loop1
+dec reg0
+mov reg1, reg0
+mod reg1, 2
+cmp reg1, 0
+jnz end
+printi reg0
+:noprint
+cmp reg0, 0
+jnz loop1
+:end
+halt
