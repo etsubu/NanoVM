@@ -1,0 +1,6 @@
+;define label
+:loop
+printi reg0
+inc reg0
+cmp reg0, 5
+jnz loop
