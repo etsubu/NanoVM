@@ -160,7 +160,7 @@ unsigned int Mapper::mapLabel(std::string label, unsigned int instructionIndex, 
 	}
 	int64_t delta;
 	if (labelIndex > instructionIndex) {
-		delta = sizeof(uint64_t) + 2; // assume max length for the jump instruction (10 bytes)
+		delta = (instructions[instructionIndex].length) ? instructions[instructionIndex].length : sizeof(uint64_t) + 2; // assume max length for the jump instruction (10 bytes)
 		for (unsigned int i = instructionIndex + 1; i < labelIndex; i++) {
 			size_t instructionLength = instructions[i].length;
 			int unAssembled = 0;
@@ -203,12 +203,21 @@ unsigned int Mapper::mapLabel(std::string label, unsigned int instructionIndex, 
 	value = delta;
 	if (instructions[instructionIndex].length)
 		return instructions[instructionIndex].length - 2;
-	if (SCHAR_MIN <= value && value <= SCHAR_MAX)
+	if (SCHAR_MIN <= value && value <= SCHAR_MAX) {
+		if (delta)
+			value -= sizeof(int64_t) - sizeof(int8_t);
 		return sizeof(int8_t);
-	else if (SHRT_MIN <= value && value <= SHRT_MAX - 1)
+	}
+	else if (SHRT_MIN <= value && value <= SHRT_MAX - 1) {
+		if (delta)
+			value -= sizeof(int16_t) - sizeof(int8_t);
 		return sizeof(int16_t);
-	else if (INT32_MIN <= value && value <= INT32_MAX - 1)
+	}
+	else if (INT32_MIN <= value && value <= INT32_MAX - 1) {
+		if (delta)
+			value -= sizeof(int32_t) - sizeof(int8_t);
 		return sizeof(int32_t);
+	}
 	return sizeof(int64_t);
 }
 

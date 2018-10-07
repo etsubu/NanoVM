@@ -1,0 +1,5 @@
+cmp reg0, 5
+jnz end
+dec reg0
+:end
+inc reg0
