@@ -9,6 +9,9 @@
 #ifndef PCH_H
 #define PCH_H
 
+#include <iostream>
+#include "../NanoVM//NanoVM.h"
+#include "NanoDebugger.h"
 // TODO: add headers that you want to pre-compile here
 
 #endif //PCH_H

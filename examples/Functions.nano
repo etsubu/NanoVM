@@ -1,0 +1,5 @@
+jmp start
+printi 0
+
+:start
+halt

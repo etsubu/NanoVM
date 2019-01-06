@@ -87,6 +87,7 @@ typedef struct NanoVMCpu{
 	unsigned char* stackBase;
 	uint64_t codeSize;
 	uint64_t stackSize;
+	uint64_t bytecodeSize;
 };
 
 typedef struct Instruction {

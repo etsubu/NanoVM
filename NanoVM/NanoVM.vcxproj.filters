@@ -29,5 +29,8 @@
     <ClCompile Include="NanoVM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Nano.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
