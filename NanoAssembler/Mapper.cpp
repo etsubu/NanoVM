@@ -41,7 +41,7 @@ Mapper::Mapper() {
 	opcodeMap["not"]	= std::make_pair(19, 1);
 	opcodeMap["inc"]	= std::make_pair(20, 1);
 	opcodeMap["dec"]	= std::make_pair(21, 1);
-	opcodeMap["ret"]	= std::make_pair(22, 1);
+	opcodeMap["ret"]	= std::make_pair(22, 0);
 
 	opcodeMap["call"]	= std::make_pair(23, 1);
 	opcodeMap["push"]	= std::make_pair(24, 1);
@@ -291,16 +291,56 @@ int Mapper::mapInteger(int64_t value64, unsigned char* bytes, unsigned int &leng
 }
 
 int Mapper::mapImmediate(std::string value, unsigned char* bytes, unsigned int &length) {
-	if (value.empty())
+	if (value.empty() || (value.length() == 1 && value[0] == '-'))
 		return -1;
 	try {
 		if (value[0] == '-')
 		{
-			int64_t value64 = std::stoll(value);
+			int64_t value64;
+			if (value.length() > 3 && value[1] == '\'' && value[value.length() - 1] == '\'') {
+				int diff = value.length() - 1 - 2;
+				if (diff == 1) {
+					value64 = -static_cast<int64_t>(value[2]);
+				}
+				else if (diff == 2 && value[2] == '\\') {
+					if (value[3] == 'n')
+						value64 = -'\n';
+					else if (value[3] == 'r')
+						value64 = -'\r';
+					else if (value[3] == 't')
+						value64 = -'t';
+					else
+						return -1;
+				}
+				else
+					return -1;
+			}
+			else
+				value64 = std::stoll(value, nullptr,0);
 			return mapInteger(value64, bytes, length);
 		}
 		else {
-			uint64_t value64 = std::stoull(value);
+			uint64_t value64;
+			if (value.length() > 2 && value[0] == '\'' && value[value.length() - 1] == '\'') {
+				int diff = value.length() - 2;
+				if (diff == 1) {
+					value64 = static_cast<uint64_t>(value[1]);
+				}
+				else if (diff == 2 && value[1] == '\\') {
+					if (value[2] == 'n')
+						value64 = '\n';
+					else if (value[2] == 'r')
+						value64 = '\r';
+					else if (value[2] == 't')
+						value64 = '\t';
+					else
+						return -1;
+				}
+				else
+					return -1;
+			}
+			else
+				value64 = std::stoull(value, nullptr, 0);
 			if (value64 <= UINT8_MAX) {
 				bytes[0] = (static_cast<uint8_t>(value64));
 				length = sizeof(uint8_t);
