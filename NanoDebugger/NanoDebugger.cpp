@@ -80,8 +80,37 @@ bool NanoDebugger::handleInteractive() {
 				std::cout << "Breakpoint removed!" << std::endl;
 			}
 		}
+		else if (value == 's') {
+			printStack();
+		}
 	} while (value != 13);
 	return true;
+}
+
+void NanoDebugger::printStack() {
+	int counter = 0;
+	unsigned char *p = (cpu.stackBase);
+	uint64_t size = (cpu.registers[esp] + cpu.codeBase) - cpu.stackBase;
+	std::cout << "\nStack size: " << size << "\n";
+	for (int i = 0; i < size; i++) {
+		if (counter == 7) {
+			counter = 0;
+			std::printf("%02X | %c %c %c %c %c %c %c %c\n", p[i], p[i - 7], p[i - 6], p[i - 5], p[i - 4], p[i - 3], p[i - 2], p[i - 1], p[i]);
+			continue;
+		}
+		else {
+			std::printf("%02X ", p[i]);
+		}
+		counter++;
+	}
+	if (counter) {
+		std::printf("|  ");
+		for (int i = counter; i > 0; i--) {
+			std::printf("%c  ", p[size - i]);
+		}
+		std::printf("\n");
+	}
+	std::printf("\n");
 }
 
 bool NanoDebugger::debug() {

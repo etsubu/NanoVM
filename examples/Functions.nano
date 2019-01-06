@@ -6,6 +6,6 @@ ret
 :start
 mov reg0, 5
 call printiln
-inc reg0
-call printiln
-halt
+;inc reg0
+;call printiln
+;halt

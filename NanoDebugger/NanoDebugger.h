@@ -17,6 +17,7 @@ public:
 	//bool disassembleToFile(std::string out);
 private:
 	std::string disassembleInstruction();
+	void printStack();
 	bool handleInteractive();
 	std::set<uint64_t> breakpoints;
 	bool run;

@@ -206,8 +206,9 @@ unsigned int Mapper::mapLabel(std::string label, unsigned int instructionIndex, 
 	}
 	value = delta;
 	std::cout << "delta " << delta << std::endl;
-	if (instructions[instructionIndex].length)
+	if (instructions[instructionIndex].length) {
 		return instructions[instructionIndex].length - 2;
+	}
 	if (SCHAR_MIN <= value && value <= SCHAR_MAX) {
 		if (delta > 0)
 			value -= (sizeof(int64_t) - sizeof(int8_t));
