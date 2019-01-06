@@ -60,6 +60,7 @@ enum Opcodes {
 	Jnz,
 	Jg,
 	Js,
+	Jmp,
 	Not,
 	Inc,
 	Dec,
@@ -69,12 +70,11 @@ enum Opcodes {
 	Push,
 	Pop,
 	Halt,
-	printi,
-	prints,
-	Memfind,
-	Memset,
-	Memcpy,
-	Memcmp
+	Printi,
+	Prints,
+	Printc,
+	Syscall,
+	Memcpy
 };
 
 enum Type {

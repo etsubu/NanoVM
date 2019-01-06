@@ -37,21 +37,21 @@ Mapper::Mapper() {
 	opcodeMap["jnz"]	= std::make_pair(15, 1);
 	opcodeMap["jg"]		= std::make_pair(16, 1);
 	opcodeMap["js"]		= std::make_pair(17, 1);
-	opcodeMap["not"]	= std::make_pair(18, 1);
-	opcodeMap["inc"]	= std::make_pair(19, 1);
-	opcodeMap["dec"]	= std::make_pair(20, 1);
-	opcodeMap["ret"]	= std::make_pair(21, 1);
+	opcodeMap["jmp"]	= std::make_pair(18, 1);
+	opcodeMap["not"]	= std::make_pair(19, 1);
+	opcodeMap["inc"]	= std::make_pair(20, 1);
+	opcodeMap["dec"]	= std::make_pair(21, 1);
+	opcodeMap["ret"]	= std::make_pair(22, 1);
 
-	opcodeMap["call"]	= std::make_pair(22, 1);
-	opcodeMap["push"]	= std::make_pair(23, 1);
-	opcodeMap["pop"]	= std::make_pair(24, 1);
-	opcodeMap["halt"]	= std::make_pair(25, 0);
-	opcodeMap["printi"]	= std::make_pair(26, 1);
-	opcodeMap["prints"]	= std::make_pair(27, 1);
-	opcodeMap["memfind"]= std::make_pair(28, 1);
-	opcodeMap["memset"] = std::make_pair(29, 1);
-	opcodeMap["memcpy"] = std::make_pair(30, 1);
-	opcodeMap["memcmp"] = std::make_pair(31, 1);
+	opcodeMap["call"]	= std::make_pair(23, 1);
+	opcodeMap["push"]	= std::make_pair(24, 1);
+	opcodeMap["pop"]	= std::make_pair(25, 1);
+	opcodeMap["halt"]	= std::make_pair(26, 0);
+	opcodeMap["printi"]	= std::make_pair(27, 1);
+	opcodeMap["prints"]	= std::make_pair(28, 1);
+	opcodeMap["printc"] = std::make_pair(29, 1);
+	opcodeMap["syscall"] = std::make_pair(30, 1);
+	opcodeMap["memcpy"]= std::make_pair(31, 1);
 }
 
 Mapper::~Mapper() {
