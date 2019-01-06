@@ -2,7 +2,7 @@
 #include "Mapper.h"
 
 enum Size {
-	Byte = 0b00000000,
+	Byte =  0b00000000,
 	Short = 0b00100000,
 	Dword = 0b01000000,
 	Qword = 0b01100000
@@ -257,35 +257,22 @@ template<typename T> void Mapper::mapImmediate(unsigned char *bytes, T value) {
 
 int Mapper::mapInteger(int64_t value64, unsigned char* bytes, unsigned int &length) {
 	if (length == sizeof(int8_t) || (!length && INT8_MIN <= value64 && value64 <= INT8_MAX)) {
-		bytes[0] = static_cast<int8_t>(value64);
+		*reinterpret_cast<int8_t*>(bytes) = static_cast<int8_t>(value64);
 		length = sizeof(int8_t);
 		return Byte;
 	}
 	else if (length == sizeof(int16_t) || (INT16_MIN <= value64 && value64 <= INT16_MAX)) {
-		uint16_t value16 = static_cast<int16_t>(value64);
-		bytes[0] = (static_cast<int8_t>(value16 >> 8));
-		bytes[1] = (static_cast<int8_t>(value16));
+		*reinterpret_cast<int16_t*>(bytes) = static_cast<int16_t>(value64);
 		length = sizeof(int16_t);
 		return Short;
 	}
 	else if (length == sizeof(int32_t) || (INT32_MIN <= value64 && value64 <= INT32_MAX)) {
-		uint32_t value32 = static_cast<int32_t>(value64);
-		bytes[0] = (static_cast<int8_t>(value32 >> 24));
-		bytes[1] = (static_cast<int8_t>(value32 >> 16));
-		bytes[2] = (static_cast<int8_t>(value32 >> 8));
-		bytes[3] = (static_cast<int8_t>(value32));
+		*reinterpret_cast<int32_t*>(bytes) = static_cast<int32_t>(value64);
 		length = sizeof(int32_t);
 		return Dword;
 	}
 	else {
-		bytes[0] = (static_cast<int8_t>(value64 >> 56));
-		bytes[1] = (static_cast<int8_t>(value64 >> 48));
-		bytes[2] = (static_cast<int8_t>(value64 >> 40));
-		bytes[3] = (static_cast<int8_t>(value64 >> 32));
-		bytes[4] = (static_cast<int8_t>(value64 >> 24));
-		bytes[5] = (static_cast<int8_t>(value64 >> 16));
-		bytes[6] = (static_cast<int8_t>(value64 >> 8));
-		bytes[7] = (static_cast<int8_t>(value64));
+		*reinterpret_cast<int64_t*>(bytes) = static_cast<int64_t>(value64);
 		length = sizeof(int64_t);
 		return Qword;
 	}
@@ -343,35 +330,22 @@ int Mapper::mapImmediate(std::string value, unsigned char* bytes, unsigned int &
 			else
 				value64 = std::stoull(value, nullptr, 0);
 			if (value64 <= UINT8_MAX) {
-				bytes[0] = (static_cast<uint8_t>(value64));
+				*reinterpret_cast<uint8_t*>(bytes) = static_cast<uint8_t>(value64);
 				length = sizeof(uint8_t);
 				return Byte;
 			}
 			else if (value64 <= UINT16_MAX) {
-				uint16_t value16 = static_cast<uint16_t>(value64);
-				bytes[0] = (static_cast<uint8_t>(value16 >> 8));
-				bytes[1] = (static_cast<uint8_t>(value16));
+				*reinterpret_cast<uint16_t*>(bytes) = static_cast<uint16_t>(value64);
 				length = sizeof(uint16_t);
 				return Short;
 			}
 			else if (value64 <= UINT32_MAX) {
-				uint32_t value32 = static_cast<uint32_t>(value64);
-				bytes[0] = (static_cast<uint8_t>(value32 >> 24));
-				bytes[1] = (static_cast<uint8_t>(value32 >> 16));
-				bytes[2] = (static_cast<uint8_t>(value32 >> 8));
-				bytes[3] = (static_cast<uint8_t>(value32));
+				*reinterpret_cast<uint32_t*>(bytes) = static_cast<uint32_t>(value64);
 				length = sizeof(uint32_t);
 				return Dword;
 			}
 			else {
-				bytes[0] = (static_cast<uint8_t>(value64 >> 56));
-				bytes[1] = (static_cast<uint8_t>(value64 >> 48));
-				bytes[2] = (static_cast<uint8_t>(value64 >> 40));
-				bytes[3] = (static_cast<uint8_t>(value64 >> 32));
-				bytes[4] = (static_cast<uint8_t>(value64 >> 24));
-				bytes[5] = (static_cast<uint8_t>(value64 >> 16));
-				bytes[6] = (static_cast<uint8_t>(value64 >> 8));
-				bytes[7] = (static_cast<uint8_t>(value64));
+				*reinterpret_cast<uint64_t*>(bytes) = static_cast<uint64_t>(value64);
 				length = sizeof(uint64_t);
 				return Qword;
 			}

@@ -122,7 +122,6 @@ bool NanoDebugger::debug() {
 				std::cout << "Breakpoint triggered! " << cpu.registers[ip] << std::endl;
 				run = false;
 				handleInteractive();
-				return true;
 			}
 			else if (!run) {
 				handleInteractive();
