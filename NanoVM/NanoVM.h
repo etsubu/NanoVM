@@ -20,6 +20,9 @@
 #define GREATER_FLAG	0b01000000
 #define SMALLER_FLAG	0b00100000
 
+// Define this to build the VM with debug mode
+#define INCLUDE_DEBUG_MODE
+
 enum Size {
 	Byte,
 	Short,
