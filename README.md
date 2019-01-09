@@ -24,7 +24,7 @@ The VM is register based so the instuctions utilize different registers. Registe
 | Esp             | 7             | Stack pointer. Points to the top of the stack|
 
 ### Instructions
-Instructions have always an opcode and 0-2 operands. Below is the instruction encoding defined from LST to MSB
+Instructions have always an opcode and 0-2 operands. Below is the instruction encoding defined from LSB to MSB
 
 | 5 bits           | 3 bits                | 1 bit             | 2 bits                      | 1 bits        | 1 bit         | 3 bits        |
 | -------------    |:---------------------:|:-----------------:|:---------------------------:|:-------------:|:-------------:|:-------------:|
