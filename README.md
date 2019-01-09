@@ -8,7 +8,7 @@ NanoVM is register based turing complete VM with stack memory. The project also 
 The VM memory are defined as pages which by default are 4096 bytes each. When initialized the VM bytecode will be placed at the bottom of the allocated memory followed by the stack memory base on the next page. While the VM is similiar to x86 the stack grows up unlike in x86. This can be utilized to dynamically increase the stack memory if required with minimal effort.
 
 ### Registers
-The VM is register based so the instuctions utilize different registers. Registers are encoded with 5 bits so there are 8 registers in total (the names will change in future):
+The VM is register based so the instuctions utilize different registers. Registers are encoded with 3 bits so there are 8 registers in total (the names will change in future):
 
 | Register        | Number        | Description                                  |
 | -------------   |:-------------:| --------------------------------------------:|
