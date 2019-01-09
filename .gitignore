@@ -69,6 +69,7 @@ artifacts/
 *.pidb
 *.svclog
 *.scc
+*.nanoc
 
 # Chutzpah Test files
 _Chutzpah*
