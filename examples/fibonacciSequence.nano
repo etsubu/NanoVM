@@ -1,4 +1,5 @@
 ;This code will print fibonacci sequence
+
 ;use reg0 and reg1 for storing numbers
 ;set reg3 as counter for how many pairs should be printed
 mov reg3, 10

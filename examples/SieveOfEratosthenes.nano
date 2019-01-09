@@ -1,4 +1,6 @@
-mov reg2, 300 ;print prime numbers under 100
+; This program will calculate prime numbers with sieve of eratosthenes and prints them to the console
+
+mov reg2, 300 ;print prime numbers under This value
 mov reg6, esp ; set base pointer
 ; initialize numbers
 :init
