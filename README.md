@@ -1,7 +1,7 @@
 # NanoVM
 PoC lightweight x64 VM implementation
 
-NanoVM is register based turing complete VM with stack memory. The project also includes assembler and debugger with similiar syntax to x86 asm with intel syntax. Note that the project is still in very early development and many thing including the insturction set and format is a subject to change, so bytecode from previous versions might not work. The documentation will be updated when changes happen
+NanoVM is register based turing complete VM with stack memory. The project also includes assembler and debugger with similiar syntax to x86 asm with intel syntax. Note that the project is still in very early development and many things including the insturction set and format is a subject to change, so bytecode from previous versions might not work in future. The documentation will be updated when changes happen
 
 ## VM architecture
 
