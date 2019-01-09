@@ -129,7 +129,7 @@ bool NanoDebugger::debug() {
 			if (inst.opcode == Halt) {
 				std::cout << "VM halted!" << std::endl;
 				handleInteractive();
-				return true;
+				break;
 			}
 			if (!execute(inst)) {
 				switch (errorFlag) {
@@ -147,7 +147,7 @@ bool NanoDebugger::debug() {
 			return false;
 		}
 	}
-	std::cout << "End of code reached!" << std::endl;
+	std::cout << "VM exited with return code: " << cpu.registers[Reg0] << std::endl;
 	handleInteractive();
 	return true;
 }
