@@ -96,6 +96,7 @@ ToDo:
 * Add include tags which would allow to write "standard libraries" which could be included to the project
 * Size definitions for registers
 * ...
+
 The assembler projects code is not currently clean and the development for that will be most likely be stopped eventually and a new compiler project will be started. Probably with external library for parsing the programming language. I will try and keep the assembler simple
 
 # NanoDebugger
