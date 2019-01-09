@@ -74,7 +74,7 @@ ToDo:
 
 # NanoAssembler
 NanoAssembler is currently a minimalistic assembler for NanoVM. The assembler was made to aid in making simple programs and tests. This project is not so much about making a "programming language" but rather the core VM which could be used as the base which some programming language is compiled to. When more advanced features will be introduced I'll consider creating a new compiler project and leave the assembler for the low level operations.
-Currently the assembler supports comments with prefix ';' and uses regex to filter multiple whitespaces to help in processing the input. The assembler also suppors labels which are defined by ':' prefix. This will be mapped to a memory addressthat points to the next instruction after label. Example:
+Currently the assembler supports comments with prefix ';' and uses regex to filter multiple whitespaces to help in processing the input. The assembler also suppors labels which are defined by ':' prefix. This will be mapped to a memory address that points to the next instruction after label. Example:
 ```assembly
 ; The assembler supports comments
 ; The assembler strips multiple whitespaces
@@ -109,6 +109,7 @@ The project contains also a simple command line debugger + disassembler. The deb
 Todo:
 * Add commands for modifying the stack and registers
 * Add whole memory dump which will dump all the memory pages including code and stack to the disk.
+* Add option to disassemble the whole code and dump to the disk with memory offsets
 
 # General
 
