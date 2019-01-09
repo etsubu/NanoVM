@@ -3,6 +3,8 @@ PoC lightweight x64 VM implementation
 
 NanoVM is register based turing complete VM with stack memory. The project also includes assembler and debugger with similiar syntax to x86 asm with intel syntax. Note that the project is still in very early development and many things including the insturction set and format is a subject to change, so bytecode from previous versions might not work in future. The documentation will be updated when changes happen
 
+Note that even though the VM does do bounds checking for read write and execute operations on memory these checks are more for catching bugs in the code + avoiding VM crashing, and not so much about hardening the VM. Escaping the VM sandbox is likely very trivial. However, if you notice a way to read, write or execute memory outside of the VM I'll gladly fix those. That being said **!this VM should not be used to run unknown and potentially hostile code!**. Also stuff like executing stack memory is currently possible and this is made on purpose to allow dynamic code generation or encryption. I might add read/write/execute permissions to memory pages in future.
+
 ## VM architecture
 
 The VM memory are defined as pages which by default are 4096 bytes each. When initialized the VM bytecode will be placed at the bottom of the allocated memory followed by the stack memory base on the next page. While the VM is similiar to x86 the stack grows up unlike in x86. This can be utilized to dynamically increase the stack memory if required with minimal effort.
