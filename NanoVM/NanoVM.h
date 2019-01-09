@@ -107,8 +107,7 @@ public:
 	NanoVM(unsigned char* code, uint64_t size);
 	NanoVM(std::string file);
 	~NanoVM();
-	void printStatus();
-	bool Run();
+	uint64_t Run();
 protected:
 	template<class T> T pop();
 	template<class T> void push(T value);

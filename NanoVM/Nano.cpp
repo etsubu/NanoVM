@@ -8,8 +8,6 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	NanoVM vm(argv[1]);
-	vm.Run();
-	vm.printStatus();
-	system("pause");
-	return 0;
+	// Return the VM's exit code
+	return vm.Run();
 }
