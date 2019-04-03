@@ -81,7 +81,7 @@ enum Type {
 	Reg,
 	Immediate
 };
-typedef struct NanoVMCpu{
+struct NanoVMCpu{
 	uint64_t registers[10];
 	unsigned char* codeBase;
 	unsigned char* stackBase;
@@ -90,7 +90,7 @@ typedef struct NanoVMCpu{
 	uint64_t bytecodeSize;
 };
 
-typedef struct Instruction {
+struct Instruction {
 	unsigned char opcode;
 	unsigned char dstReg;
 	unsigned char srcReg;
@@ -102,6 +102,9 @@ typedef struct Instruction {
 	unsigned char instructionSize;
 };
 
+typedef struct NanoVMCpu NanoVMCpu;
+typedef struct Instruction Instruction;
+
 class NanoVM {
 public:
 	NanoVM(unsigned char* code, uint64_t size);
@@ -111,7 +114,7 @@ public:
 protected:
 	template<class T> T pop();
 	template<class T> void push(T value);
-	bool fetch(Instruction &instruction);
+	bool fetch(Instruction &instruction) const;
 	bool execute(Instruction &instruction);
 	unsigned char errorFlag;
 	NanoVMCpu cpu;

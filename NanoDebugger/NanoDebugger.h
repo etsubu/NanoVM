@@ -16,7 +16,7 @@ public:
 	bool debug();
 	//bool disassembleToFile(std::string out);
 private:
-	std::string disassembleInstruction();
+	bool disassembleInstruction(std::string &instruction);
 	void printStack();
 	bool handleInteractive();
 	std::set<uint64_t> breakpoints;

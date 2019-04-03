@@ -13,41 +13,51 @@ NanoDebugger::~NanoDebugger() {
 
 }
 
-std::string NanoDebugger::disassembleInstruction() {
+bool NanoDebugger::disassembleInstruction(std::string &instruction) {
 	Instruction ins;
-	bool success = fetch(ins);
+	if (!fetch(ins)) {
+		return false;
+	}
 	std::string opcode = instructionStr[ins.opcode];
-	if (ins.opcode == Opcodes::Halt || ins.opcode == Opcodes::Ret)
-		return opcode;
+	if (ins.opcode == Opcodes::Halt || ins.opcode == Opcodes::Ret) {
+		instruction = opcode;
+		return true;
+	}
 	// Single param instructions
 	if (ins.opcode == Opcodes::Jg || ins.opcode == Opcodes::Js || ins.opcode == Opcodes::Jnz || ins.opcode == Opcodes::Jz ||
 		ins.opcode == Opcodes::Jmp || ins.opcode == Opcodes::Push || ins.opcode == Opcodes::Pop || ins.opcode == Opcodes::Call ||
 		ins.opcode == Opcodes::Dec || ins.opcode == Opcodes::Inc || ins.opcode == Opcodes::Printc || ins.opcode == Opcodes::Printi ||
 		ins.opcode == Opcodes::Prints) {
 		if (ins.srcType == Type::Reg) {
-			return opcode + ((ins.isSrcMem) ? " @reg" : " reg") + std::to_string(ins.srcReg);
+			instruction = opcode + ((ins.isSrcMem) ? " @reg" : " reg") + std::to_string(ins.srcReg);
 		}
 		else {
-			return opcode + ((ins.isSrcMem) ? " @" : " ") + std::to_string(ins.immediate);
+			instruction = opcode + ((ins.isSrcMem) ? " @" : " ") + std::to_string(ins.immediate);
 		}
 	}
 	// two param instruction 
 	else {
 		if (ins.srcType == Type::Reg) {
-			return opcode + ((ins.isDstMem) ? " @reg" : " reg") + std::to_string(ins.dstReg) + ", " +
+			instruction = opcode + ((ins.isDstMem) ? " @reg" : " reg") + std::to_string(ins.dstReg) + ", " +
 				((ins.isSrcMem) ? " @reg" : "reg") + std::to_string(ins.srcReg);
 		}
 		else {
-			return opcode + ((ins.isDstMem) ? " @reg" : " reg") + std::to_string(ins.dstReg) + ", " +
+			instruction = opcode + ((ins.isDstMem) ? " @reg" : " reg") + std::to_string(ins.dstReg) + ", " +
 				((ins.isSrcMem) ? "@" : "") + std::to_string(ins.immediate);
 		}
 	}
+	return true;
 }
 
 bool NanoDebugger::handleInteractive() {
 	int value = 0;
 	do {
-		std::cout << cpu.registers[ip] << ". " << disassembleInstruction() << std::endl;
+		std::string instruction;
+		if (!disassembleInstruction(instruction)) {
+			std::cout << "Failed to fetch instruction: IP out of bounds! IP: " << cpu.registers[ip] << std::endl;
+			return false;
+		}
+		std::cout << cpu.registers[ip] << ". " << instruction << std::endl;
 		std::cout << "> ";
 		value = _getch();
 		std::cout << "\b\b";
