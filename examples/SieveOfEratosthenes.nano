@@ -1,0 +1,69 @@
+; This program will calculate prime numbers with sieve of eratosthenes and prints them to the console
+
+mov reg2, 300 ;print prime numbers under This value
+mov reg6, esp ; set base pointer
+; initialize numbers
+:init
+push reg0
+inc reg0
+cmp reg0, reg2
+js init
+; stack is now allocated
+; iterate through array
+mov reg3, reg6 ; set to beginning of array
+add reg3, 16 ; skip 2 values
+:loop
+cmp @reg3, 0
+jz waszero
+mov reg4, @reg3 ;reg2 = array[reg3]
+mul reg4, 8
+mov reg2, reg4
+add reg2, reg6
+:subloop
+add reg2, reg4
+cmp reg2, esp
+jg waszero
+jz waszero
+mov reg5, @reg2
+mod reg5, @reg3 ; modulo
+cmp reg5, 0 ;was divided evenly => zero out
+jnz nozero
+xor @reg2, @reg2
+
+:nozero
+jmp subloop
+; loop through multiples of reg3
+
+:waszero
+;printi reg3
+;printc '\n'
+add reg3, 8
+cmp reg3, esp
+jnz loop
+;print prime numbers
+mov reg3, reg6
+add reg3, 16
+
+:printloop
+mov reg0, @reg3
+cmp reg0, 0
+jz notprime
+printi reg0
+printc '\n'
+:notprime
+add reg3, 8
+cmp reg3, esp
+js printloop
+halt
+
+
+
+
+
+
+
+
+
+
+
+

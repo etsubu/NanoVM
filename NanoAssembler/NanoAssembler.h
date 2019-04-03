@@ -2,8 +2,8 @@
 
 #define SRC_TYPE 0b10000000
 #define SRC_SIZE 0b01100000
-#define SRC_MEM  0b00010000
-#define DST_MEM  0b00001000
+#define DST_MEM  0b00010000
+#define SRC_MEM  0b00001000
 
 enum Type {
 	Reg = 0,

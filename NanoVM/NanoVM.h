@@ -60,6 +60,7 @@ enum Opcodes {
 	Jnz,
 	Jg,
 	Js,
+	Jmp,
 	Not,
 	Inc,
 	Dec,
@@ -69,12 +70,11 @@ enum Opcodes {
 	Push,
 	Pop,
 	Halt,
-	printi,
-	prints,
-	Memfind,
-	Memset,
-	Memcpy,
-	Memcmp
+	Printi,
+	Prints,
+	Printc,
+	Syscall,
+	Memcpy
 };
 
 enum Type {
@@ -87,6 +87,7 @@ typedef struct NanoVMCpu{
 	unsigned char* stackBase;
 	uint64_t codeSize;
 	uint64_t stackSize;
+	uint64_t bytecodeSize;
 };
 
 typedef struct Instruction {
@@ -106,9 +107,8 @@ public:
 	NanoVM(unsigned char* code, uint64_t size);
 	NanoVM(std::string file);
 	~NanoVM();
-	void printStatus();
-	bool Run();
-private:
+	uint64_t Run();
+protected:
 	template<class T> T pop();
 	template<class T> void push(T value);
 	bool fetch(Instruction &instruction);

@@ -1,0 +1,16 @@
+mov reg0, esp
+push 'h'
+push 'e'
+push 'l'
+push 'l'
+push 'o'
+push 32
+push 'w'
+push 'o'
+push 'r'
+push 'l'
+push 'd'
+push 0x00
+prints @reg0
+; prints hello world
+halt
