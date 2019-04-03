@@ -249,7 +249,7 @@ bool Mapper::mapOpcode(std::string opcodeName, Instruction &instruction) {
 	}
 }
 
-template<typename T> void Mapper::mapImmediate(unsigned char *bytes, T value) {
+template<typename T> void Mapper::mapImmediate(unsigned char* bytes, T value) {
 	for (unsigned int i = 0; i < sizeof(T); i++) {
 		bytes[i] = static_cast<uint8_t>(value >> ((sizeof(T) * 8) - 8));
 	}
