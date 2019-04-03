@@ -3,22 +3,22 @@
 #include <iostream>
 #include <fstream>
 
-#define PAGE_SIZE 4096
-#define OPCODE_MASK  0b00011111
-#define DST_REG_MASK 0b11100000
-#define SRC_TYPE	 0b10000000
-#define SRC_SIZE	 0b01100000
-#define DST_MEM		 0b00010000
-#define SRC_MEM		 0b00001000
-#define SRC_REG		 0b00000111
+constexpr uint32_t PAGE_SIZE	= 4096;
+constexpr uint8_t OPCODE_MASK	= 0b00011111;
+constexpr uint8_t DST_REG_MASK	= 0b11100000;
+constexpr uint8_t SRC_TYPE		= 0b10000000;
+constexpr uint8_t SRC_SIZE		= 0b01100000;
+constexpr uint8_t DST_MEM		= 0b00010000;
+constexpr uint8_t SRC_MEM		= 0b00001000;
+constexpr uint8_t SRC_REG		= 0b00000111;
 
-#define STACK_ERROR			0b10000000
-#define IP_ERROR			0b01000000
-#define MEMORY_ACCESS		0b00100000
+constexpr uint8_t STACK_ERROR	= 0b10000000;
+constexpr uint8_t IP_ERROR		= 0b01000000;
+constexpr uint8_t MEMORY_ACCESS = 0b00100000;
 
-#define ZERO_FLAG		0b10000000
-#define GREATER_FLAG	0b01000000
-#define SMALLER_FLAG	0b00100000
+constexpr uint8_t ZERO_FLAG		= 0b10000000;
+constexpr uint8_t GREATER_FLAG	= 0b01000000;
+constexpr uint8_t SMALLER_FLAG	= 0b00100000;
 
 enum Size {
 	Byte,
