@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include "Types.h"
 #include "NanoAssembler.h"
 
 /**
@@ -55,7 +56,7 @@ public:
 	 * @param instructions List of all the instructions
 	 * @return True if the label can be resolved to relative address from the current instruction, false if not
 	*/
-	bool canMapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, unsigned int> labelMap, std::vector<Instruction> instructions);
+	bool canMapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap, std::vector<Instruction> instructions);
 	
 	/**
 	 * Calculate the size requirement in bytes for the relative label address from the current instruction.
@@ -66,7 +67,7 @@ public:
 	 * @param instructions List of all the instructions
 	 * @return Size of the relative address in bytes
 	*/
-	int calculateSizeRequirement(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, unsigned int> labelMap, std::vector<Instruction> instructions);
+	int calculateSizeRequirement(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap, std::vector<Instruction> instructions);
 
 	/**
 	 * Maps label to relative address from the current instruction. Should noly be called if canMapLabel returns true
@@ -76,7 +77,7 @@ public:
 	 * @param[out] instructions[out] Reference to the list of all the instructions. Corresponding instructions will be updated with the relative address
 	 * @return Size of the resolved relative address
 	*/
-	unsigned int mapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, unsigned int> labelMap, std::vector<Instruction> &instructions, int64_t &value);
+	unsigned int mapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap, std::vector<Instruction> &instructions, int64_t &value);
 	
 	/**
 	 * Maps integer to bytes with minimum required bytes

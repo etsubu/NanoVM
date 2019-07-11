@@ -154,6 +154,7 @@
     <ClInclude Include="Mapper.h" />
     <ClInclude Include="NanoAssembler.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Mapper.cpp" />

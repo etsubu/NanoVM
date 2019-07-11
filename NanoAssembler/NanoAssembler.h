@@ -1,27 +1,49 @@
 #pragma once
-
-constexpr uint8_t SRC_TYPE = 0b10000000;
-constexpr uint8_t SRC_SIZE = 0b01100000;
-constexpr uint8_t DST_MEM  = 0b00010000;
-constexpr uint8_t SRC_MEM  = 0b00001000;
-
-/**
- * Type enum holds the type mask of value reg/immediate
-*/
-enum Type {
-	Reg = 0,
-	Immediate = 0b10000000
-};
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <regex>
+#include <algorithm>
+#include <sstream>
+#include "Types.h"
+#include "Mapper.h"
+#include "NanoAssembler.h"
 
 /**
- * Instruction represent a single instruction to be assembled
+ * NanoAssembler instance handles loading assembler files and compiling those to bytecode format
 */
-typedef struct Instruction {
-	std::string line;
-	unsigned char bytecode[2 + sizeof(int64_t)];
-	unsigned char opcode;
-	unsigned int operands;
-	unsigned int length;
-	unsigned int lineNumber;
-	bool assembled;
+class NanoAssembler {
+public:
+	NanoAssembler();
+	~NanoAssembler();
+
+	/**
+	 * \brief Assembles input file and writes the resulting bytecode to a file on disk
+	 *
+	 * NanoAssembler loads the input file containing assembler instructions, compiles those in to binary format
+	 * and writes them to a binary file on disk
+	 * @param inputFile Points to the assembler file to load
+	 * @param outputFile Points to the file where the compiled bytecode will be written
+	 * @return 1 on success and anything else meaning failure
+	 */
+	AssemblerReturnValues assembleToFile(std::string inputFile, std::string outputFile);
+
+	/**
+	 * \brief Assembles input file to buffer in memory
+	 *
+	 * NanoAssembler loads the input file containing assembler instructions, compiles those in to binary format
+	 * and outputs them to dynamically allocated buffer
+	 * @param inputFile Points to the assembler file to load
+	 * @param[out] bytecodeBuffer Reference to a pointer that will point to the compiled bytecode buffer
+	 * @param[out] size Reference to an int that will hold the size of the bytecodeBuffer in bytes
+	 * @return 1 on success and anything else meaning failure
+	*/
+	AssemblerReturnValues assembleToMemory(std::string inputFile, unsigned char*& bytecodeBuffer, unsigned int &size);
+private:
+	bool readLines(std::string file, std::vector<Instruction>& lines, std::unordered_map<std::string, size_t>& labelMap);
+	int assembleInstruction(int i, std::vector<Instruction>& instructionBytes, std::unordered_map<std::string, size_t> labelMap, bool initial);
+	bool assemble(std::vector<Instruction>& instruction, std::unordered_map<std::string, size_t>& labelMap);
+
+	Mapper mapper;
 };

@@ -58,8 +58,8 @@ Mapper::~Mapper() {
 
 }
 
-bool Mapper::canMapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, unsigned int> labelMap, std::vector<Instruction> instructions) {
-	unsigned int labelIndex;
+bool Mapper::canMapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap, std::vector<Instruction> instructions) {
+	size_t labelIndex;
 	try {
 		labelIndex = labelMap.at(label);
 	}
@@ -88,8 +88,8 @@ bool Mapper::canMapLabel(std::string label, unsigned int instructionIndex, std::
 	return true;
 }
 
-int Mapper::calculateSizeRequirement(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, unsigned int> labelMap, std::vector<Instruction> instructions) {
-	unsigned int labelIndex;
+int Mapper::calculateSizeRequirement(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap, std::vector<Instruction> instructions) {
+	size_t labelIndex;
 	try {
 		labelIndex = labelMap.at(label);
 	}
@@ -151,8 +151,8 @@ int Mapper::calculateSizeRequirement(std::string label, unsigned int instruction
 	return (delta > 0) ? (2 + sizeof(int64_t)) : sizeof(int64_t);
 }
 
-unsigned int Mapper::mapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, unsigned int> labelMap, std::vector<Instruction> &instructions, int64_t &value) {
-	unsigned int labelIndex;
+unsigned int Mapper::mapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap, std::vector<Instruction> &instructions, int64_t &value) {
+	size_t labelIndex;
 	try {
 		labelIndex = labelMap.at(label);
 	}
@@ -286,7 +286,7 @@ int Mapper::mapImmediate(std::string value, unsigned char* bytes, unsigned int &
 		{
 			int64_t value64;
 			if (value.length() > 3 && value[1] == '\'' && value[value.length() - 1] == '\'') {
-				int diff = value.length() - 1 - 2;
+				size_t diff = value.length() - 1 - 2;
 				if (diff == 1) {
 					value64 = -static_cast<int64_t>(value[2]);
 				}
@@ -310,7 +310,7 @@ int Mapper::mapImmediate(std::string value, unsigned char* bytes, unsigned int &
 		else {
 			uint64_t value64;
 			if (value.length() > 2 && value[0] == '\'' && value[value.length() - 1] == '\'') {
-				int diff = value.length() - 2;
+				size_t diff = value.length() - 2;
 				if (diff == 1) {
 					value64 = static_cast<uint64_t>(value[1]);
 				}
