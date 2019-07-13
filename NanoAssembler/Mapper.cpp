@@ -1,12 +1,4 @@
-#include "pch.h"
 #include "Mapper.h"
-
-enum Size {
-	Byte =  0b00000000,
-	Short = 0b00100000,
-	Dword = 0b01000000,
-	Qword = 0b01100000
-};
 
 Mapper::Mapper() {
 	registerMap["reg0"] = 0x00;
@@ -15,7 +7,7 @@ Mapper::Mapper() {
 	registerMap["reg3"] = 0x03;
 	registerMap["reg4"] = 0x04;
 	registerMap["reg5"] = 0x05;
-	registerMap["reg6"] = 0x06;
+	registerMap["bp"] = 0x06;
 	registerMap["esp"]  = 0x07;
 
 	opcodeMap["mov"]	= std::make_pair(0, 2);
@@ -58,7 +50,9 @@ Mapper::~Mapper() {
 
 }
 
-bool Mapper::canMapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap, std::vector<Instruction> instructions) {
+bool Mapper::canMapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap,
+	std::vector<AssemberInstruction> instructions) {
+
 	size_t labelIndex;
 	try {
 		labelIndex = labelMap.at(label);
@@ -88,7 +82,9 @@ bool Mapper::canMapLabel(std::string label, unsigned int instructionIndex, std::
 	return true;
 }
 
-int Mapper::calculateSizeRequirement(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap, std::vector<Instruction> instructions) {
+int Mapper::calculateSizeRequirement(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap,
+	std::vector<AssemberInstruction> instructions) {
+
 	size_t labelIndex;
 	try {
 		labelIndex = labelMap.at(label);
@@ -151,7 +147,9 @@ int Mapper::calculateSizeRequirement(std::string label, unsigned int instruction
 	return (delta > 0) ? (2 + sizeof(int64_t)) : sizeof(int64_t);
 }
 
-unsigned int Mapper::mapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap, std::vector<Instruction> &instructions, int64_t &value) {
+unsigned int Mapper::mapLabel(std::string label, unsigned int instructionIndex, std::unordered_map<std::string, size_t> labelMap,
+	std::vector<AssemberInstruction> &instructions, int64_t &value) {
+
 	size_t labelIndex;
 	try {
 		labelIndex = labelMap.at(label);
@@ -237,7 +235,7 @@ bool Mapper::mapRegister(std::string regName, unsigned char& reg) {
 	}
 }
 
-bool Mapper::mapOpcode(std::string opcodeName, Instruction &instruction) {
+bool Mapper::mapOpcode(std::string opcodeName, AssemberInstruction&instruction) {
 	try {
 		std::pair<unsigned char, unsigned int> opcode = opcodeMap[opcodeName];
 		instruction.opcode = opcode.first;
@@ -291,14 +289,20 @@ int Mapper::mapImmediate(std::string value, unsigned char* bytes, unsigned int &
 					value64 = -static_cast<int64_t>(value[2]);
 				}
 				else if (diff == 2 && value[2] == '\\') {
-					if (value[3] == 'n')
+					switch (value[3]) {
+					case 'n':
 						value64 = -'\n';
-					else if (value[3] == 'r')
+						break;
+					case 'r':
 						value64 = -'\r';
-					else if (value[3] == 't')
+						break;
+					case 't':
 						value64 = -'t';
-					else
+						break;
+					default:
 						return -1;
+					}
+
 				}
 				else
 					return -1;
@@ -315,14 +319,19 @@ int Mapper::mapImmediate(std::string value, unsigned char* bytes, unsigned int &
 					value64 = static_cast<uint64_t>(value[1]);
 				}
 				else if (diff == 2 && value[1] == '\\') {
-					if (value[2] == 'n')
+					switch (value[2]) {
+					case 'n':
 						value64 = '\n';
-					else if (value[2] == 'r')
+						break;
+					case 'r':
 						value64 = '\r';
-					else if (value[2] == 't')
-						value64 = '\t';
-					else
+						break;
+					case 't':
+						value64 = 't';
+						break;
+					default:
 						return -1;
+					}
 				}
 				else
 					return -1;

@@ -1,5 +1,4 @@
-#include "pch.h"
-
+#include "NanoVM.h"
 
 int main(int argc, char* argv[])
 {

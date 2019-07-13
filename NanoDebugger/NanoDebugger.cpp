@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "NanoDebugger.h"
 
 NanoDebugger::NanoDebugger(std::string file) : NanoVM(file) {
@@ -28,7 +27,7 @@ bool NanoDebugger::disassembleInstruction(std::string &instruction) {
 		ins.opcode == Opcodes::Jmp || ins.opcode == Opcodes::Push || ins.opcode == Opcodes::Pop || ins.opcode == Opcodes::Call ||
 		ins.opcode == Opcodes::Dec || ins.opcode == Opcodes::Inc || ins.opcode == Opcodes::Printc || ins.opcode == Opcodes::Printi ||
 		ins.opcode == Opcodes::Prints) {
-		if (ins.srcType == Type::Reg) {
+		if (ins.srcType == DataType::Reg) {
 			instruction = opcode + ((ins.isSrcMem) ? " @reg" : " reg") + std::to_string(ins.srcReg);
 		}
 		else {
@@ -37,7 +36,7 @@ bool NanoDebugger::disassembleInstruction(std::string &instruction) {
 	}
 	// two param instruction 
 	else {
-		if (ins.srcType == Type::Reg) {
+		if (ins.srcType == DataType::Reg) {
 			instruction = opcode + ((ins.isDstMem) ? " @reg" : " reg") + std::to_string(ins.dstReg) + ", " +
 				((ins.isSrcMem) ? " @reg" : "reg") + std::to_string(ins.srcReg);
 		}
@@ -62,7 +61,7 @@ bool NanoDebugger::handleInteractive() {
 		value = _getch();
 		std::cout << "\b\b";
 		if (value == 'h') {
-			std::cout << "\n(s)tack\nr(e)gisters\n(b)reakpoint\n(r)un\n(c)lean breakpoint" << std::endl;
+			std::cout << "\n(s)tack\nr(e)gisters\n(b)reakpoint\n(r)un\n(c)lean breakpoint\n(q)uit" << std::endl;
 		}
 		else if (value == 'e') {
 			std::cout << "\nRegisters:\n";
@@ -92,6 +91,9 @@ bool NanoDebugger::handleInteractive() {
 		}
 		else if (value == 's') {
 			printStack();
+		}
+		else if (value == 'q') {
+			return false;
 		}
 	} while (value != 13);
 	return true;

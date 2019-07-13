@@ -1,6 +1,7 @@
 mov reg0, 5 	;reg0 is now 5
 add reg1, reg0 	;reg1 is now 5
 mov reg3, 3
-sub reg0, reg3
-cmp reg0, reg1
+sub reg0, reg3  ;reg0 is now 2
+mul reg0, reg1  ;reg0 is now 10
+div reg0, 2		;reg0 is now 5
 halt

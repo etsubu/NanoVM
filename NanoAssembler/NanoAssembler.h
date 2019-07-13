@@ -8,7 +8,6 @@
 #include <sstream>
 #include "Types.h"
 #include "Mapper.h"
-#include "NanoAssembler.h"
 
 /**
  * NanoAssembler instance handles loading assembler files and compiling those to bytecode format
@@ -41,9 +40,9 @@ public:
 	*/
 	AssemblerReturnValues assembleToMemory(std::string inputFile, unsigned char*& bytecodeBuffer, unsigned int &size);
 private:
-	bool readLines(std::string file, std::vector<Instruction>& lines, std::unordered_map<std::string, size_t>& labelMap);
-	int assembleInstruction(int i, std::vector<Instruction>& instructionBytes, std::unordered_map<std::string, size_t> labelMap, bool initial);
-	bool assemble(std::vector<Instruction>& instruction, std::unordered_map<std::string, size_t>& labelMap);
+	bool readLines(std::string file, std::vector<AssemberInstruction>& lines, std::unordered_map<std::string, size_t>& labelMap);
+	int assembleInstruction(int i, std::vector<AssemberInstruction>& instructionBytes, std::unordered_map<std::string, size_t> labelMap, bool initial);
+	bool assemble(std::vector<AssemberInstruction>& instruction, std::unordered_map<std::string, size_t>& labelMap);
 
 	Mapper mapper;
 };

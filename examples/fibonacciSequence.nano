@@ -1,19 +1,21 @@
-;This code will print fibonacci sequence
+;This code will print fibonacci sequence and return the last number
 
 ;use reg0 and reg1 for storing numbers
 ;set reg3 as counter for how many pairs should be printed
 mov reg3, 10
 ;set reg1 to 1
-mov reg1, 1
+inc reg1
 ;label could be placed here
 :loop
 printi reg0
 printc '\n'
 add reg0, reg1
 printi reg1
+mov reg4, reg1
 printc '\n'
 add reg1, reg0
 dec reg3 ;subtract 1 from reg3
 cmp reg3, reg5 ; compare to 0 (reg5 is initialized as 0)
 jnz loop
+mov reg0, reg4
 halt

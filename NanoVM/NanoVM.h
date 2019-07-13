@@ -6,11 +6,11 @@
 constexpr uint32_t PAGE_SIZE	= 4096;
 constexpr uint8_t OPCODE_MASK	= 0b00011111;
 constexpr uint8_t DST_REG_MASK	= 0b11100000;
-constexpr uint8_t SRC_TYPE		= 0b10000000;
-constexpr uint8_t SRC_SIZE		= 0b01100000;
-constexpr uint8_t DST_MEM		= 0b00010000;
-constexpr uint8_t SRC_MEM		= 0b00001000;
-constexpr uint8_t SRC_REG		= 0b00000111;
+constexpr uint8_t SRC_TYPE_MASK	= 0b10000000;
+constexpr uint8_t SRC_SIZE_MASK = 0b01100000;
+constexpr uint8_t DST_MEM_MASK  = 0b00010000;
+constexpr uint8_t SRC_MEM_MASK  = 0b00001000;
+constexpr uint8_t SRC_REG_MASK  = 0b00000111;
 
 constexpr uint8_t STACK_ERROR	= 0b10000000;
 constexpr uint8_t IP_ERROR		= 0b01000000;
@@ -19,16 +19,6 @@ constexpr uint8_t MEMORY_ACCESS = 0b00100000;
 constexpr uint8_t ZERO_FLAG		= 0b10000000;
 constexpr uint8_t GREATER_FLAG	= 0b01000000;
 constexpr uint8_t SMALLER_FLAG	= 0b00100000;
-
-/**
- * Size enum defines used integer sizes which are 8, 16, 32, 64 bits
-*/
-enum Size {
-	Byte,
-	Short,
-	Dword,
-	Qword
-};
 
 /**
  * Register enum defines all the CPU registers + flags and instruction pointer
@@ -40,8 +30,8 @@ enum Register {
 	Reg3,
 	Reg4,
 	Reg5,
-	Reg6,
-	esp,
+	bp, // base pointer for current stack frame
+	esp, 
 	ip,
 	flags
 };
@@ -86,13 +76,28 @@ enum Opcodes {
 	Memcpy
 };
 
+#ifndef TYPE_H
+#define TYPE_H
+
 /**
- * Type enum defines data types for the instructions which can be register or immediate value
+ * Size enum defines used integer sizes which are 8, 16, 32, 64 bits
 */
-enum Type {
+enum Size {
+	Byte,
+	Short,
+	Dword,
+	Qword
+};
+
+/**
+ * DataType enum defines data types for the instructions which can be register or immediate value
+*/
+enum DataType {
 	Reg,
 	Immediate
 };
+
+#endif // !TYPE_H
 
 /**
  * NanoVMCpu struct defines the CPU core which holds registers and pointers to code base, stack base and their respective sizes
