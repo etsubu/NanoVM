@@ -57,15 +57,4 @@ cmp reg3, esp
 js printloop
 mov reg0, reg1 ; return value is the last prime
 halt
-
-
-
-
-
-
-
-
-
-
-
-
+; NANO_TEST_EXPECT_RETURN=293

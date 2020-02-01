@@ -3,3 +3,4 @@ jnz end
 sub reg0, 1
 :end
 inc reg0
+; NANO_TEST_EXPECT_RETURN=1
