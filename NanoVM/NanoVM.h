@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 constexpr uint32_t PAGE_SIZE	= 4096;
 constexpr uint8_t OPCODE_MASK	= 0b00011111;
