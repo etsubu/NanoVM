@@ -12,7 +12,7 @@ Build instructions have been tested on Windows and Debian based linux distros
 ### Windows (Visual Studio 2019)
 
 You need to have Visual Studio 2019 and cmake installed on your system.\
-Visual Studio 2019 is compatible with cmake projects so you can build the project ny opening the project with visual studio, right click the root CMakeLists.txt -> "Generate Cache for NanoVM". This will generate the cmake cache for you and now you can build the project by selecting 
+Visual Studio 2019 is compatible with cmake projects so you can build the project by opening the project in visual studio, right click the root CMakeLists.txt -> "Generate Cache for NanoVM". This will generate the cmake cache for you and now you can build the project by selecting 
 from the menu bar: Build -> Build all.\
 If you rather wish to generate visual studio specific build files you can do that by running the following command in the project root with cmd/powershell:
 
