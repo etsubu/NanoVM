@@ -1,5 +1,5 @@
 #pragma once
-#include "../NanoVM/NanoVM.h"
+#include "NanoVM.h"
 #include "Instructions.h"
 #include <iostream>
 #include <string>
