@@ -24,6 +24,19 @@ This will generate new Visual Studio build files under build/
 
 ### Debian
 
+You need to have build tools and cmake available. You can install those by running the following commands in terminal 
+```
+sudo apt install build-essentials
+sudo apt install cmake
+```
+Now to build the project run the following commands
+```
+git clone https://github.com/etsubu/NanoVM.git
+cd NanoVM
+cmake .
+make
+```
+This will build all the binaries in their own folders along the source files.
 
 ## VM architecture
 
