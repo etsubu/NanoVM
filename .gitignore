@@ -1,4 +1,8 @@
-# ignore git and visual studio config dirs + build dirs
 .git/
 .vs/
 out/
+build/
+CMakeFiles/
+*.filters
+*.cmake
+*.vcxproj
