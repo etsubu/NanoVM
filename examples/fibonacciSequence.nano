@@ -19,3 +19,4 @@ cmp reg3, reg5 ; compare to 0 (reg5 is initialized as 0)
 jnz loop
 mov reg0, reg4
 halt
+; NANO_TEST_EXPECT_RETURN=4181

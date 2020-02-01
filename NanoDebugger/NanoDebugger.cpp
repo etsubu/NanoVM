@@ -58,7 +58,7 @@ bool NanoDebugger::handleInteractive() {
 		}
 		std::cout << cpu.registers[ip] << ". " << instruction << std::endl;
 		std::cout << "> ";
-		value = _getch();
+		value = getchar();
 		std::cout << "\b\b";
 		if (value == 'h') {
 			std::cout << "\n(s)tack\nr(e)gisters\n(b)reakpoint\n(r)un\n(c)lean breakpoint\n(q)uit" << std::endl;

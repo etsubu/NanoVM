@@ -5,3 +5,4 @@ sub reg0, reg3  ;reg0 is now 2
 mul reg0, reg1  ;reg0 is now 10
 div reg0, 2		;reg0 is now 5
 halt
+; NANO_TEST_EXPECT_RETURN=5

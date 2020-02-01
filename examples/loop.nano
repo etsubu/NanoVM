@@ -3,3 +3,4 @@ add reg0, 1
 cmp reg0, 5
 js -8
 halt
+; NANO_TEST_EXPECT_RETURN=5

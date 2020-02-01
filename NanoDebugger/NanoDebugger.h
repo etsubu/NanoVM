@@ -1,12 +1,12 @@
 #pragma once
-#include "../NanoVM/NanoVM.h"
+#include "NanoVM.h"
 #include "Instructions.h"
 #include <iostream>
 #include <string>
 #include <set>
 #include <vector>
 #include <fstream>
-#include <conio.h>
+// Windows only #include <conio.h>
 
 /**
  * \brief NanoDebugger inherits NanoVM allowing more control over the execution of the program

@@ -11,3 +11,4 @@ cmp reg0, 0
 jnz loop1
 :end
 halt
+; NANO_TEST_EXPECT_RETURN=9

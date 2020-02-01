@@ -10,3 +10,4 @@ printi reg0
 cmp reg0, 0
 jnz loop1
 halt
+; NANO_TEST_EXPECT_RETURN=0
