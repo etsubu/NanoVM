@@ -1,9 +1,36 @@
 # NanoVM
 PoC lightweight x64 VM implementation
 
-NanoVM is cross-platform register based turing complete VM with stack memory. The project also includes assembler and debugger with similiar syntax to x86 asm with intel syntax. Note that the project is still in very early development and many things including the insturction set and format is a subject to change, so bytecode from previous versions might not work in future. The documentation will be updated when changes happen
+### Table of contents
 
-Note that even though the VM does do bounds checking for read write and execute operations on memory these checks are more for catching bugs in the code + avoiding VM crashing, and not so much about hardening the VM. Escaping the VM sandbox is likely very trivial. However, if you notice a way to read, write or execute memory outside of the VM I'll gladly fix those. That being said **!this VM should not be used to run unknown and potentially hostile code!**. Also stuff like executing stack memory is currently possible and this is made on purpose to allow dynamic code generation or encryption. I might add read/write/execute permissions to memory pages in future.
+- [NanoVM](#nanovm)
+  * [General](#general)
+  * [How to build](#how-to-build)
+    + [Windows (Visual Studio 2019)](#windows--visual-studio-2019-)
+    + [Debian](#debian)
+  * [VM architecture](#vm-architecture)
+    + [Registers](#registers)
+    + [Instructions](#instructions)
+- [NanoAssembler](#nanoassembler)
+- [NanoDebugger](#nanodebugger)
+
+## General 
+
+NanoVM is cross-platform register based turing complete VM with stack memory. The project also includes assembler and debugger with similiar syntax to x86 asm with intel syntax. 
+Note that the project is still in very early development and many things including the insturction set and format is a subject to change, so bytecode from previous versions might not work in future. 
+The documentation will be updated when changes happen.
+
+The longer term goal of the project is to be embeddable VM with a small bytecode format while maintaining reasonable performance speed. 
+Syscall instruction that contains some implemented functions like IO but user can register custom functions as callbacks for different syscall function values will be added eventually when the bytecode format has been finalized. 
+This allows one to implement more "outside of the VM" functionality". Performance comparison tests to other languages will be added later. 
+Longer term goal is to eventually actually program the Compiler/Assembler in NanoVM bytecode. 
+
+Note that even though the VM does do bounds checking for read write and execute operations on memory these checks are more for catching bugs in the code + avoiding VM crashing, and not so much about hardening the VM. 
+Escaping the VM sandbox is likely very trivial. 
+However, if you notice a way to read, write or execute memory outside of the VM I'll gladly fix those. 
+That being said **!this VM should not be used to run unknown and potentially hostile code!**. 
+Also stuff like executing stack memory is currently possible and this is made on purpose to allow dynamic code generation or encryption. 
+Read/write/execute permissions to memory pages might be added in future.
 
 ## How to build
 
@@ -145,9 +172,3 @@ Todo:
 * Add commands for modifying the stack and registers
 * Add whole memory dump which will dump all the memory pages including code and stack to the disk.
 * Add option to disassemble the whole code and dump to the disk with memory offsets
-
-# General
-
-The longer term goal of the project is to be embeddable VM with a small bytecode format while maintaining reasonable performance speed. Also I'll implement syscall instruction that contains some implemented functions like IO but user can register custom functions as callbacks for different syscall function values. This allows one to implement more "outside of the VM" functionality". I will add performance comparison tests to other languages later. Also eventually I'm looking to actually program the Compiler/Assembler in NanoVM bytecode. This VM could also probably be easily utilized in simple code protection schemes for "crackme" challenges. One could scramble the "opcodes" enum and add memory encryption for the bytecode and stack memory which is only decrypted when a single read operation is performed.
-ToDo:
-* Doxygen documentation
