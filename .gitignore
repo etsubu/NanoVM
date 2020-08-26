@@ -6,3 +6,6 @@ CMakeFiles/
 *.filters
 *.cmake
 *.vcxproj
+CMakeCache.txt
+DartConfiguration.tcl
+NanoVM.sln

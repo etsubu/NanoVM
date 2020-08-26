@@ -7,8 +7,8 @@ NanoVM::NanoVM(unsigned char* code, uint64_t size) {
 	memset(&cpu, 0x00, sizeof(cpu));
 	// Zero out registers
 	memset(cpu.registers, 0x00, sizeof(cpu.registers));
-	cpu.codeSize = (PAGE_SIZE * (1 + (size / PAGE_SIZE)));
-	cpu.stackSize = PAGE_SIZE;
+	cpu.codeSize = (NANOVM_PAGE_SIZE * (1 + (size / NANOVM_PAGE_SIZE)));
+	cpu.stackSize = NANOVM_PAGE_SIZE;
 	// allocate whole memory, code pages, stack, +10 bytes
 	// +10 bytes is for instruction fetching which might read more bytes than the instruction size
 	// This avoids reading memory out side of the VM
@@ -37,8 +37,8 @@ NanoVM::NanoVM(std::string fileName) {
 	{
 		size = file.tellg();
 
-		cpu.codeSize = (PAGE_SIZE * (1 + (size / PAGE_SIZE)));
-		cpu.stackSize = PAGE_SIZE;
+		cpu.codeSize = (NANOVM_PAGE_SIZE * (1 + (size / NANOVM_PAGE_SIZE)));
+		cpu.stackSize = NANOVM_PAGE_SIZE;
 
 		// allocate whole memory, code pages, stack, +10 bytes
 		// +10 bytes is for instruction fetching which might read more bytes than the instruction size

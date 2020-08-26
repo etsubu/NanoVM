@@ -4,7 +4,8 @@
 #include <fstream>
 #include <cstring>
 
-constexpr uint32_t PAGE_SIZE	= 4096;
+// VM masks and constants
+constexpr uint32_t NANOVM_PAGE_SIZE	= 4096;
 constexpr uint8_t OPCODE_MASK	= 0b00011111;
 constexpr uint8_t DST_REG_MASK	= 0b11100000;
 constexpr uint8_t SRC_TYPE_MASK	= 0b10000000;
@@ -13,10 +14,12 @@ constexpr uint8_t DST_MEM_MASK  = 0b00010000;
 constexpr uint8_t SRC_MEM_MASK  = 0b00001000;
 constexpr uint8_t SRC_REG_MASK  = 0b00000111;
 
+// Error flags
 constexpr uint8_t STACK_ERROR	= 0b10000000;
 constexpr uint8_t IP_ERROR		= 0b01000000;
 constexpr uint8_t MEMORY_ACCESS = 0b00100000;
 
+// Comparison flags
 constexpr uint8_t ZERO_FLAG		= 0b10000000;
 constexpr uint8_t GREATER_FLAG	= 0b01000000;
 constexpr uint8_t SMALLER_FLAG	= 0b00100000;
