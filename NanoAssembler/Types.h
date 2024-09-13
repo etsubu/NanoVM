@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <cstdint>
 
 constexpr uint8_t SRC_TYPE = 0b10000000;
 constexpr uint8_t SRC_SIZE = 0b01100000;

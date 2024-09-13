@@ -6,6 +6,8 @@
 #include <regex>
 #include <algorithm>
 #include <sstream>
+#include <iterator>
+#include <cstring>
 #include "Types.h"
 #include "Mapper.h"
 

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <cstdint>
 
 // VM masks and constants
 constexpr uint32_t NANOVM_PAGE_SIZE	= 4096;
