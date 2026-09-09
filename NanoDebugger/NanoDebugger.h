@@ -1,66 +1,22 @@
 #pragma once
+
 #include "NanoVM.h"
 #include "Instructions.h"
-#include <iostream>
-#include <string>
-#include <set>
-#include <vector>
-#include <fstream>
-// Windows only #include <conio.h>
 
-/**
- * \brief NanoDebugger wraps NanoVM allowing more control over the execution of the program
- *
- * NanoDebugger drives the NanoVM core and allows to step through the execution, dump stack, set breakpoints
- * disassembling of instructions and other debugger behavior. 
-*/
-class NanoDebugger {
-public:
-	/**
-	 * Initializes NanoDebugger
-	 * @param file Bytecode file to load
-	*/
-	NanoDebugger(std::string file);
-
-	/**
-	 * Initializes NanoDebugger
-	 * @param bytecode Bytecode buffer to load
-	 * @param size Size of the bytecode buffer
-	*/
-	NanoDebugger(unsigned char *bytecode, uint64_t size);
-
-	/**
-	 * NanDebugger destructor
-	*/
-	~NanoDebugger();
-
-	/**
-	 * Starts interactive debugging of the loaded bytecode program
-	 * @return True if bytecode program was executed successfully, false if error occurred
-	*/
-	bool debug();
-	//bool disassembleToFile(std::string out);
-private:
-
-	/**
-	 * Disassembles the next instruction pointed by IP
-	 * @param[out] instruction String reference to hold the text representation of disassembled instruction
-	 * @return True if instruction was disassembled successfully, false if failed
-	*/
-	bool disassembleInstruction(std::string &instruction);
-
-	/**
-	 * Prints stack dump of the stack memory on screen
-	*/
-	void printStack();
-
-	/**
-	 * Handles interactive mode for the current instruction allowing user to interact with the program
-	 * @return True if successfull, false if failed
-	*/
-	bool handleInteractive();
-
-	NanoVM vm; /**< NanoVM core that executes the loaded bytecode */
-	std::set<uint64_t> breakpoints; /**< Set of all active breakpoints */
-	bool run; /**< Boolean value whether to run until breakpoint is hit or false if stepping through */
+struct NanoDebugger {
+	NanoVM vm;
+	uint64_t* breakpoints;
+	size_t breakpointCount;
+	size_t breakpointCapacity;
+	bool run;
 };
+
+typedef struct NanoDebugger NanoDebugger;
+
+void NanoDebuggerInit(NanoDebugger* debugger, const char* file);
+
+void NanoDebuggerInitFromMemory(NanoDebugger* debugger, unsigned char* bytecode, uint64_t size);
+
+void NanoDebuggerDestroy(NanoDebugger* debugger);
+
+bool NanoDebuggerDebug(NanoDebugger* debugger);

@@ -69,6 +69,25 @@ This will build all the binaries in their own folders along the source files.
 
 The VM memory are defined as pages which by default are 4096 bytes each. When initialized the VM bytecode will be placed at the bottom of the allocated memory followed by the stack memory base on the next page. While the VM is similiar to x86 the stack grows up unlike in x86. This can be utilized to dynamically increase the stack memory if required with minimal effort.
 
+### Memory layout
+
+        Higher memory addresses
+        ┌─────────────────────┐
+        │      HEAP           │
+        │                     │
+        │         ↑           │
+        │      grows up       │
+        ├─────────────────────┤
+        │      STACK          │
+        │                     │
+        │         ↑           │
+        │      grows up       │
+        ├─────────────────────┤
+        │     BYTECODE        │
+        │                     │
+        └─────────────────────┘
+        Lower memory addresses
+
 ### Registers
 The VM is register based so the instuctions utilize different registers. Registers are encoded with 3 bits so there are 8 registers in total (the names will change in future):
 

@@ -3,13 +3,11 @@
 #
 cmake_minimum_required (VERSION 3.10)
 
-project ("NanoVM")
+project ("NanoVM" C)
 
 # Include sub-projects.
 add_subdirectory ("NanoVM")
-add_subdirectory ("NanoAssembler")
 add_subdirectory ("NanoDebugger")
-add_subdirectory ("NanoUnitTests")
 
 include( CTest )
 enable_testing()
