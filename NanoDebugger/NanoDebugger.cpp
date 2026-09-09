@@ -1,20 +1,22 @@
 #include "NanoDebugger.h"
 
-NanoDebugger::NanoDebugger(std::string file) : NanoVM(file) {
+NanoDebugger::NanoDebugger(std::string file) {
+	NanoVMInitFromFile(&vm, file.c_str());
 	run = false;
 }
 
-NanoDebugger::NanoDebugger(unsigned char *bytecode, uint64_t size) : NanoVM(bytecode, size) {
+NanoDebugger::NanoDebugger(unsigned char *bytecode, uint64_t size) {
+	NanoVMInit(&vm, bytecode, size);
 	run = false;
 }
 
 NanoDebugger::~NanoDebugger() {
-
+	NanoVMDestroy(&vm);
 }
 
 bool NanoDebugger::disassembleInstruction(std::string &instruction) {
 	Instruction ins;
-	if (!fetch(ins)) {
+	if (!NanoVMFetch(&vm, &ins)) {
 		return false;
 	}
 	std::string opcode = instructionStr[ins.opcode];
@@ -53,10 +55,10 @@ bool NanoDebugger::handleInteractive() {
 	do {
 		std::string instruction;
 		if (!disassembleInstruction(instruction)) {
-			std::cout << "Failed to fetch instruction: IP out of bounds! IP: " << cpu.registers[ip] << std::endl;
+			std::cout << "Failed to fetch instruction: IP out of bounds! IP: " << vm.cpu.registers[ip] << std::endl;
 			return false;
 		}
-		std::cout << cpu.registers[ip] << ". " << instruction << std::endl;
+		std::cout << vm.cpu.registers[ip] << ". " << instruction << std::endl;
 		std::cout << "> ";
 		value = getchar();
 		std::cout << "\b\b";
@@ -66,7 +68,7 @@ bool NanoDebugger::handleInteractive() {
 		else if (value == 'e') {
 			std::cout << "\nRegisters:\n";
 			for (int i = 0; i < 8; i++) {
-				std::cout << "reg" << i << ": " << cpu.registers[i] << std::endl;
+				std::cout << "reg" << i << ": " << vm.cpu.registers[i] << std::endl;
 			}
 		}
 		else if (value == 'r') {
@@ -80,7 +82,7 @@ bool NanoDebugger::handleInteractive() {
 			breakpoints.insert(offset);
 		}
 		else if (value == 'c') {
-			auto a = breakpoints.find(cpu.registers[ip]);
+			auto a = breakpoints.find(vm.cpu.registers[ip]);
 			if (a == breakpoints.end()) {
 				std::cout << "No breakpoint was placed here!" << std::endl;
 			}
@@ -101,8 +103,8 @@ bool NanoDebugger::handleInteractive() {
 
 void NanoDebugger::printStack() {
 	int counter = 0;
-	unsigned char *p = (cpu.stackBase);
-	uint64_t size = (cpu.registers[esp] + cpu.codeBase) - cpu.stackBase;
+	unsigned char *p = (vm.cpu.stackBase);
+	uint64_t size = (vm.cpu.registers[esp] + vm.cpu.codeBase) - vm.cpu.stackBase;
 	std::cout << "\nStack size: " << size << "\n";
 	for (int i = 0; i < size; i++) {
 		if (counter == 7) {
@@ -127,11 +129,11 @@ void NanoDebugger::printStack() {
 
 bool NanoDebugger::debug() {
 	run = false;
-	while (cpu.registers[ip] < cpu.bytecodeSize) {
+	while (vm.cpu.registers[ip] < vm.cpu.bytecodeSize) {
 		Instruction inst;
-		if (fetch(inst)) {
-			if (breakpoints.find(cpu.registers[ip]) != breakpoints.end()) {
-				std::cout << "Breakpoint triggered! " << cpu.registers[ip] << std::endl;
+		if (NanoVMFetch(&vm, &inst)) {
+			if (breakpoints.find(vm.cpu.registers[ip]) != breakpoints.end()) {
+				std::cout << "Breakpoint triggered! " << vm.cpu.registers[ip] << std::endl;
 				run = false;
 				handleInteractive();
 			}
@@ -143,8 +145,8 @@ bool NanoDebugger::debug() {
 				handleInteractive();
 				break;
 			}
-			if (!execute(inst)) {
-				switch (errorFlag) {
+			if (!NanoVMExecute(&vm, &inst)) {
+				switch (vm.errorFlag) {
 				case MEMORY_ACCESS:
 					std::cout << "Tried to read/write memory outside of VM!" << std::endl;
 					break;
@@ -159,7 +161,7 @@ bool NanoDebugger::debug() {
 			return false;
 		}
 	}
-	std::cout << "VM exited with return code: " << cpu.registers[Reg0] << std::endl;
+	std::cout << "VM exited with return code: " << vm.cpu.registers[Reg0] << std::endl;
 	handleInteractive();
 	return true;
 }

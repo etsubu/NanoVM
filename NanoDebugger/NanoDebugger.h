@@ -9,12 +9,12 @@
 // Windows only #include <conio.h>
 
 /**
- * \brief NanoDebugger inherits NanoVM allowing more control over the execution of the program
+ * \brief NanoDebugger wraps NanoVM allowing more control over the execution of the program
  *
- * NanoDebugger inherits NanoVM implementation and allows to step through the execution, dump stack, set breakpoints
+ * NanoDebugger drives the NanoVM core and allows to step through the execution, dump stack, set breakpoints
  * disassembling of instructions and other debugger behavior. 
 */
-class NanoDebugger : NanoVM {
+class NanoDebugger {
 public:
 	/**
 	 * Initializes NanoDebugger
@@ -60,6 +60,7 @@ private:
 	*/
 	bool handleInteractive();
 
+	NanoVM vm; /**< NanoVM core that executes the loaded bytecode */
 	std::set<uint64_t> breakpoints; /**< Set of all active breakpoints */
 	bool run; /**< Boolean value whether to run until breakpoint is hit or false if stepping through */
 };
