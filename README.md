@@ -81,22 +81,22 @@ The VM is register based so the instuctions utilize different registers. Registe
 | Reg4            | 4             | General purpose.                             |
 | Reg5            | 5             | General purpose.                             |
 | Reg6            | 6             | General purpose.                             |
-| Esp             | 7             | Stack pointer. Points to the top of the stack|
+| SP              | 7             | Stack pointer. Points to the top of the stack|
 
 ### Instructions
 Instructions have always an opcode and 0-2 operands. Below is the instruction encoding defined from LSB to MSB
 
-| 5 bits           | 3 bits                | 1 bit             | 2 bits                      | 1 bits        | 1 bit         | 3 bits        |
-| -------------    |:---------------------:|:-----------------:|:---------------------------:|:-------------:|:-------------:|:-------------:|
-| Opcode           | Destination register  | Source type       | Source size                 | Is_Dst_pointer| Is_Src_pointer|Source register|
-| What instruction | Update this register  | Reg=0, Immediate=1| Byte, short, dword, qword   | True,false    | True, false   | Source register if src type is reg|
+| 5 bits           | 3 bits                | 1 bit             | 2 bits                      | 1 bits        | 1 bit                  | 3 bits        |
+| -------------    |:---------------------:|:-----------------:|:---------------------------:|:-------------:|:----------------------:|:-------------:|
+| Opcode           | Destination register  | Source type       | Source size                 | float or int  | signed or unsigned     |Source register|
+| What instruction | Update this register  | Reg=0, Immediate=1| 8,16,32,64 bit              | 0=int, 1=float| 0=unsigned, 1=signed   | Source register if src type is reg|
 
 So most of the instructions are encoded in 2 bytes + immediate value if used. Instructions that use zero operands effectively being only 1 byte are:
 ```assembly
 Halt ; Stops the execution and exits the VM execution
 ret ; Pops value from the top of the stack and performs absolute jump to that address. Updates stack pointer
 ```
-Instructions that use 1 operand do not use either source register or immediate value. They do not use destination register even though it is always defined. Opcodes that use 1 operand:
+Instructions that use 1 operand encode a register operand in the destination register field with source type Reg, and an immediate operand in the immediate value with source type Immediate. The source register field is unused, so a decoder has to read the source type bit to know which field holds the operand. Opcodes that use 1 operand:
 ```assembly
 	Jz; Jump if zero flag is set. Example: jz reg0
 	Jnz; Jump if zero flag is not set. Example: jnz reg0
@@ -113,6 +113,8 @@ Instructions that use 1 operand do not use either source register or immediate v
 	Prints; prints given null terminated string. Example: prints @reg0 | Note that @reg0 uses reg0 as pointer to the string not as an absolute value
 	Printc; prints given ASCII char to the console. Example printc reg0
 ```
+
+Jump and call targets are relative offsets measured from the start of the jump instruction itself, not from the instruction that follows it. A label used with any other instruction resolves to an absolute address instead.
 Instructions with 2 operands:
 ```assembly
 	Mov; mov reg0, reg0 <=> reg0 = reg0
