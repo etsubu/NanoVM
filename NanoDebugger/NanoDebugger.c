@@ -39,30 +39,27 @@ static bool disassembleInstruction(NanoDebugger* debugger, char* instruction, si
 	if (!NanoVMFetch(&debugger->vm, &ins)) {
 		return false;
 	}
+
 	const char* opcode = instructionStr[ins.opcode];
 	if (ins.opcode == Halt || ins.opcode == Ret) {
 		snprintf(instruction, length, "%s", opcode);
 		return true;
 	}
 	if (ins.opcode == Jg || ins.opcode == Js || ins.opcode == Jnz || ins.opcode == Jz ||
-		ins.opcode == Jmp || ins.opcode == Push || ins.opcode == Pop || ins.opcode == Call ||
-		ins.opcode == Dec || ins.opcode == Inc || ins.opcode == Printc || ins.opcode == Printi ||
-		ins.opcode == Prints) {
+		ins.opcode == Jmp || ins.opcode == Push || ins.opcode == Pop || ins.opcode == Call) {
 		if (ins.srcType == Reg) {
-			snprintf(instruction, length, "%s%s%d", opcode, (ins.isSrcMem) ? " @reg" : " reg", ins.srcReg);
+			snprintf(instruction, length, "%s%s%d", opcode, " reg", ins.srcReg);
 		}
 		else {
-			snprintf(instruction, length, "%s%s%" PRIu64, opcode, (ins.isSrcMem) ? " @" : " ", ins.immediate);
+			snprintf(instruction, length, "%s%s%" PRIu64, opcode, " ", ins.immediate);
 		}
 	}
 	else {
 		if (ins.srcType == Reg) {
-			snprintf(instruction, length, "%s%s%d, %s%d", opcode, (ins.isDstMem) ? " @reg" : " reg", ins.dstReg,
-				(ins.isSrcMem) ? " @reg" : "reg", ins.srcReg);
+			snprintf(instruction, length, "%s%s%d, %s%d", opcode, " reg", ins.dstReg, "reg", ins.srcReg);
 		}
 		else {
-			snprintf(instruction, length, "%s%s%d, %s%" PRIu64, opcode, (ins.isDstMem) ? " @reg" : " reg", ins.dstReg,
-				(ins.isSrcMem) ? "@" : "", ins.immediate);
+			snprintf(instruction, length, "%s%s%d, %s%" PRIu64, opcode, " reg", ins.dstReg, ins.immediate);
 		}
 	}
 	return true;
@@ -71,7 +68,7 @@ static bool disassembleInstruction(NanoDebugger* debugger, char* instruction, si
 static void printStack(NanoDebugger* debugger) {
 	int counter = 0;
 	unsigned char *p = (debugger->vm.cpu.stackBase);
-	uint64_t size = (debugger->vm.cpu.registers[esp] + debugger->vm.cpu.codeBase) - debugger->vm.cpu.stackBase;
+	uint64_t size = (debugger->vm.cpu.registers[sp] + debugger->vm.cpu.memoryBase) - debugger->vm.cpu.stackBase;
 	printf("\nStack size: %" PRIu64 "\n", size);
 	for (int i = 0; i < size; i++) {
 		if (counter == 7) {
@@ -174,7 +171,7 @@ void NanoDebuggerDestroy(NanoDebugger* debugger) {
 
 bool NanoDebuggerDebug(NanoDebugger* debugger) {
 	debugger->run = false;
-	while (debugger->vm.cpu.registers[ip] < debugger->vm.cpu.bytecodeSize) {
+	while (debugger->vm.cpu.registers[ip] < debugger->vm.cpu.codeSize) {
 		Instruction inst;
 		if (NanoVMFetch(&debugger->vm, &inst)) {
 			if (findBreakpoint(debugger, debugger->vm.cpu.registers[ip]) != debugger->breakpointCount) {

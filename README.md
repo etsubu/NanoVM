@@ -1,4 +1,4 @@
-# NanoVM
+﻿# NanoVM
 PoC lightweight x64 VM implementation
 
 ### Table of contents
@@ -107,15 +107,15 @@ Instructions have always an opcode and 0-2 operands. Below is the instruction en
 
 | 5 bits           | 3 bits                | 1 bit             | 2 bits                      | 1 bits        | 1 bit                  | 3 bits        |
 | -------------    |:---------------------:|:-----------------:|:---------------------------:|:-------------:|:----------------------:|:-------------:|
-| Opcode           | Destination register  | Source type       | Source size                 | float or int  | signed or unsigned     |Source register|
-| What instruction | Update this register  | Reg=0, Immediate=1| 8,16,32,64 bit              | 0=int, 1=float| 0=unsigned, 1=signed   | Source register if src type is reg|
+| Opcode           | Destination register  | Source type       | Source size                 | float or int  | reserved               |Source register|
+| What instruction | Update this register  | Reg=0, Immediate=1| 8,16,32,64 bit              | 0=int, 1=float|                        | Source register if src type is reg|
 
 So most of the instructions are encoded in 2 bytes + immediate value if used. Instructions that use zero operands effectively being only 1 byte are:
 ```assembly
 Halt ; Stops the execution and exits the VM execution
 ret ; Pops value from the top of the stack and performs absolute jump to that address. Updates stack pointer
 ```
-Instructions that use 1 operand encode a register operand in the destination register field with source type Reg, and an immediate operand in the immediate value with source type Immediate. The source register field is unused, so a decoder has to read the source type bit to know which field holds the operand. Opcodes that use 1 operand:
+Instructions that use 1 operand encode a register operand in the destination register field with source type Reg, and an immediate operand in the immediate value with source type Immediate. The source register field is unused, so a decoder has to read the source type bit to know which field holds the operand. A register operand is always read at the full 64 bits, because the descriptor byte of this form carries no size. Opcodes that use 1 operand:
 ```assembly
 	Jz; Jump if zero flag is set. Example: jz reg0
 	Jnz; Jump if zero flag is not set. Example: jnz reg0
@@ -123,37 +123,60 @@ Instructions that use 1 operand encode a register operand in the destination reg
 	Js;  Jump if smaller flag is set. Example: js reg0
 	Jmp; Jump ("goto") instruction. Example: jmp reg0
 	Not; Flip the bits in value. Example: not reg0
-	Inc; Increases the value by one: Example inc reg0
-	Dec; Decreases the value by one: Example dec reg0
-	Call; Pushes the next instructions absolute memory address to the stack and performs relative jump to the given address. Updates stack pointer Example: call reg0
+	Call; Pushes the next instructions absolute memory address to the stack and jumps to the given address. Updates stack pointer. Example: call reg0
 	Push; Pushes value to the top of the stack. Example: push reg0
-	Pop; Pops value from the top of the stack and moves the value to given address. Example: pop reg0
-	Printi; prints given integer. Example: printi reg0
-	Prints; prints given null terminated string. Example: prints @reg0 | Note that @reg0 uses reg0 as pointer to the string not as an absolute value
-	Printc; prints given ASCII char to the console. Example printc reg0
+	Pop; Pops value from the top of the stack and moves the value to given register. Example: pop reg0
 ```
+Push and pop always move a full 64 bit slot so that call and ret agree on the size of a return address.
 
-Jump and call targets are relative offsets measured from the start of the jump instruction itself, not from the instruction that follows it. A label used with any other instruction resolves to an absolute address instead.
+An immediate jump or call target is a relative offset measured from the start of the jump instruction itself, not from the instruction that follows it. A register jump or call target is an absolute address, which is what makes indirect calls work, since a label used with any other instruction also resolves to an absolute address:
+```assembly
+mov reg0, :func ; absolute address of func
+call reg0       ; absolute jump
+```
 Instructions with 2 operands:
 ```assembly
-	Mov; mov reg0, reg0 <=> reg0 = reg0
-	Add; add reg0, reg0 <=> reg0 += reg0
-	Sub; mov reg0, reg0 <=> reg0 -= reg0
-	And; mov reg0, reg0 <=> reg0 &= reg0
-	Or;  or reg0, reg0 <=> reg0 |= reg0
-	Xor; xor reg0, reg0 <=> reg0 ^= reg0
-	Sar; sar reg0, reg0 <=> reg0 >>= reg0
-	Sal; sal reg0, reg0 <=> reg0 <<= reg0
-	Ror; ror reg0, reg0 <=> performs circular shift to the right on reg0, by reg0 times
-	Rol; rol reg0, reg0 <=> performs circular shift to the left on reg0, by reg0 times
-	Mul; mul reg0, reg0 <=> reg0 *= reg0
-	Div; div reg0, reg0 <=> reg0 /= reg0
-	Mod; mod reg0, reg0 <=> reg0 %= reg0
-	Cmp; cmp reg0, reg1 | Compares the 2 values and sets flags depending on the comparison.
+	Mov; mov reg0, reg1 <=> reg0 = reg1
+	Add; add reg0, reg1 <=> reg0 += reg1
+	Sub; sub reg0, reg1 <=> reg0 -= reg1
+	And; and reg0, reg1 <=> reg0 &= reg1
+	Or;  or reg0, reg1 <=> reg0 |= reg1
+	Xor; xor reg0, reg1 <=> reg0 ^= reg1
+	Shl; shl reg0, reg1 <=> reg0 <<= reg1 | The shift count is taken modulo 64
+	Shr; shr reg0, reg1 <=> logical shift right, shifts in zeroes
+	Shr_s; shr_s reg0, reg1 <=> arithmetic shift right, shifts in the sign bit
+	Mul; mul reg0, reg1 <=> reg0 *= reg1
+	Div; div reg0, reg1 <=> unsigned division
+	Div_s; div_s reg0, reg1 <=> signed division
+	Mod; mod reg0, reg1 <=> unsigned remainder
+	Mod_s; mod_s reg0, reg1 <=> signed remainder
+	Cmp; cmp reg0, reg1 | Compares the 2 values as unsigned and sets flags depending on the comparison
+	Cmp_s; cmp_s reg0, reg1 | Compares the 2 values as signed
+	Load; load reg0, reg1 <=> reg0 = memory at the address in reg1. The source size is the access width, so "load reg0, reg1.8" reads a single byte. The address operand must be a register
+	Store; store reg0, reg1 <=> memory at the address in reg0 = reg1. Note that here the destination register holds the address and the source holds the value
+	Syscall; syscall reg0, 1 | Performs the syscall named by the source operand and stores its result in the destination register
 ```
+
+### Signed and unsigned
+The encoding carries no sign bit. The opcode alone decides how its operands are interpreted, so any operation whose result differs between a signed and an unsigned reading has a separate `_s` opcode: `div_s`, `mod_s`, `cmp_s` and `shr_s`. Everything else (`add`, `sub`, `mul`, `and`, `or`, `xor`, `shl`, `not`, `mov`) produces the same bits either way and needs no variant.
+
+The same rule decides how a narrow source is widened to 64 bits: an `_s` opcode sign extends its source, every other opcode zero extends it. Jump and call displacements are always sign extended. Because of this the assembler picks an immediate width that the opcode's own extension rule reproduces exactly, so `mov reg0, -1` needs the full 8 bytes while `div_s reg0, -1` fits in one.
+
+Only `cmp` and `cmp_s` write the flags. The three flags are mutually exclusive, so `jg` means strictly greater and `js` strictly smaller.
+
+### Syscalls
+The print instructions were replaced by `syscall`, which takes its arguments from the stack and writes its result to the destination register:
+
+| Number | Name | Behaviour |
+| ------ |:----:| ---------:|
+| 0 | write string | Pops an address and writes the null terminated string at it. Returns the number of bytes written |
+| 1 | write integer | Pops a value and writes it as a signed decimal. Returns the number of bytes written |
+| 2 | write character | Pops a value and writes its lowest byte as an ASCII character. Returns 1 |
+| 3 | exit | Pops a value, stores it in reg0 and halts the VM |
+
 ToDo:
-* Remove print instructions and move them under the syscall instruction to operate with stream pointers. This allows the printing to support console IO and for example file IO
-* Implement syscall instruction
+* Add data sections so that string literals can be placed in memory without pushing them a byte at a time
+* Add an instruction for converting between integers and floats
 
 # NanoAssembler
 NanoAssembler is currently a minimalistic assembler for NanoVM. The assembler was made to aid in making simple programs and tests. This project is not so much about making a "programming language" but rather the core VM which could be used as the base which some programming language is compiled to. When more advanced features will be introduced I'll consider creating a new compiler project and leave the assembler for the low level operations.

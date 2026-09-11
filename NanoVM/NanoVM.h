@@ -11,13 +11,12 @@ extern "C" {
 #endif
 
 #define NANOVM_PAGE_SIZE	4096
-#define OPCODE_MASK	0b00011111
-#define DST_REG_MASK	0b11100000
-#define SRC_TYPE_MASK	0b10000000
-#define SRC_SIZE_MASK	0b01100000
-#define DST_MEM_MASK	0b00010000
-#define SRC_MEM_MASK	0b00001000
-#define SRC_REG_MASK	0b00000111
+#define DST_REG_MASK	0b1110000000000000
+#define OPCODE_MASK		0b0001111110000000
+#define RESERVED_MASK	0b0000000001000000
+#define SRC_TYPE_MASK	0b0000000000100000
+#define SRC_SIZE_MASK	0b0000000000011000
+#define SRC_REG_MASK	0b0000000000000111
 
 #define STACK_ERROR	0b10000000
 #define IP_ERROR	0b01000000
@@ -35,7 +34,7 @@ enum Register {
 	Reg4,
 	Reg5,
 	bp,
-	esp,
+	sp,
 	ip,
 	flags
 };
@@ -47,10 +46,8 @@ enum Opcodes {
 	And,
 	Or,
 	Xor,
-	Sar,
-	Sal,
-	Ror,
-	Rol,
+	Shr,
+	Shl,
 	Mul,
 	Div,
 	Mod,
@@ -62,29 +59,27 @@ enum Opcodes {
 	Js,
 	Jmp,
 	Not,
-	Inc,
-	Dec,
-	Ret,
 
 	Call,
 	Push,
 	Pop,
+	Ret,
 	Halt,
-	Printi,
-	Prints,
-	Printc,
+	Load,
+	Store,
 	Syscall,
-	Memcpy
+
+	Printi
 };
 
 #ifndef TYPE_H
 #define TYPE_H
 
 enum Size {
-	Byte,
-	Short,
-	Dword,
-	Qword
+	bits8,
+	bits16,
+	bits32,
+	bits64
 };
 
 enum DataType {
@@ -95,12 +90,13 @@ enum DataType {
 #endif
 
 struct NanoVMCpu {
-	uint64_t registers[10];
-	unsigned char* codeBase;
+	int64_t registers[10];
+	unsigned char* memoryBase;
 	unsigned char* stackBase;
+	unsigned char* heapBase;
 	uint64_t codeSize;
 	uint64_t stackSize;
-	uint64_t bytecodeSize;
+	size_t memorySize;
 };
 
 struct Instruction {
@@ -108,10 +104,8 @@ struct Instruction {
 	unsigned char dstReg;
 	unsigned char srcReg;
 	unsigned char srcType;
-	bool isDstMem;
-	bool isSrcMem;
 	unsigned char srcSize;
-	uint64_t immediate;
+	int64_t immediate;
 	unsigned char instructionSize;
 };
 

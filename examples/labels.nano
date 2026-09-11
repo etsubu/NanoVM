@@ -1,7 +1,8 @@
 ;define label
 :loop
 printi reg0
-inc reg0
+add reg0, 1
 cmp reg0, 5
-jnz loop
+jnz :loop
+halt
 ; NANO_TEST_EXPECT_RETURN=5

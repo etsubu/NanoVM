@@ -38,15 +38,13 @@ func NumberToByteArray[T int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 
 	return arr[:size]
 }
 
-func ConvertToNumber(value string) (Number, error) {
+func ConvertToNumber(value string, signed bool) (Number, error) {
 	if value == "" {
 		return Number{}, errors.New("Empty number")
 	}
 	switch value[0] {
-	case '.':
-		return Number{Label: value, Sign: Signed, NumSize: Bit64, Type: Int}, nil
-	case ':':
-		return Number{Label: value, Sign: Signed, NumSize: Bit64, Type: Int}, nil
+	case '.', ':':
+		return Number{Label: value, NumSize: Bit64, Type: Int}, nil
 	}
 	if strings.Contains(value, ".") {
 		// Float
@@ -54,42 +52,53 @@ func ConvertToNumber(value string) (Number, error) {
 		if err != nil {
 			return Number{}, err
 		}
-		return Number{bytes: NumberToByteArray(f), Sign: Signed, NumSize: Bit64, Type: Float}, nil
+		return Number{bytes: NumberToByteArray(f), NumSize: Bit64, Type: Float}, nil
 	}
+	// The opcode alone decides how the VM extends the immediate, so the width has to
+	// be one the opcode's own extension rule reproduces exactly.
 	if value[0] == '-' {
 		val, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
 			return Number{}, err
 		}
-		if val <= math.MaxInt8 && val >= math.MinInt8 {
-			return Number{bytes: NumberToByteArray(int8(val)), Sign: Signed, NumSize: Bit8, Type: Int}, nil
+		if !signed {
+			// Zero extension can only reproduce a negative literal at full width
+			return Number{bytes: NumberToByteArray(val), NumSize: Bit64, Type: Int}, nil
 		}
-		if val <= math.MaxInt16 && val >= math.MinInt16 {
-			return Number{bytes: NumberToByteArray(int16(val)), Sign: Signed, NumSize: Bit16, Type: Int}, nil
+		if val >= math.MinInt8 {
+			return Number{bytes: NumberToByteArray(int8(val)), NumSize: Bit8, Type: Int}, nil
 		}
-		if val <= math.MaxInt32 && val >= math.MinInt32 {
-			return Number{bytes: NumberToByteArray(int32(val)), Sign: Signed, NumSize: Bit32, Type: Int}, nil
+		if val >= math.MinInt16 {
+			return Number{bytes: NumberToByteArray(int16(val)), NumSize: Bit16, Type: Int}, nil
 		}
-		return Number{bytes: NumberToByteArray(int64(val)), Sign: Signed, NumSize: Bit64, Type: Int}, nil
+		if val >= math.MinInt32 {
+			return Number{bytes: NumberToByteArray(int32(val)), NumSize: Bit32, Type: Int}, nil
+		}
+		return Number{bytes: NumberToByteArray(val), NumSize: Bit64, Type: Int}, nil
 	}
 	val, err := strconv.ParseUint(value, 10, 64)
 	if err != nil {
 		return Number{}, err
 	}
-	if val <= math.MaxUint8 && val >= 0 {
-		return Number{bytes: NumberToByteArray(uint8(val)), Sign: Unsigned, NumSize: Bit8, Type: Int}, nil
+	// Sign extension is only a no-op while the top bit of the chosen width is clear
+	max8, max16, max32 := uint64(math.MaxUint8), uint64(math.MaxUint16), uint64(math.MaxUint32)
+	if signed {
+		max8, max16, max32 = math.MaxInt8, math.MaxInt16, math.MaxInt32
 	}
-	if val <= math.MaxUint16 && val >= 0 {
-		return Number{bytes: NumberToByteArray(uint16(val)), Sign: Unsigned, NumSize: Bit16, Type: Int}, nil
+	if val <= max8 {
+		return Number{bytes: NumberToByteArray(uint8(val)), NumSize: Bit8, Type: Int}, nil
 	}
-	if val <= math.MaxUint32 && val >= 0 {
-		return Number{bytes: NumberToByteArray(uint32(val)), Sign: Unsigned, NumSize: Bit32, Type: Int}, nil
+	if val <= max16 {
+		return Number{bytes: NumberToByteArray(uint16(val)), NumSize: Bit16, Type: Int}, nil
 	}
-	return Number{bytes: NumberToByteArray(uint64(val)), Sign: Unsigned, NumSize: Bit64, Type: Int}, nil
+	if val <= max32 {
+		return Number{bytes: NumberToByteArray(uint32(val)), NumSize: Bit32, Type: Int}, nil
+	}
+	return Number{bytes: NumberToByteArray(val), NumSize: Bit64, Type: Int}, nil
 }
 
 func ConvertInt64ToNumber(val int64) (Number, error) {
-	return Number{bytes: NumberToByteArray(int64(val)), Sign: Signed, NumSize: Bit64, Type: Int}, nil
+	return Number{bytes: NumberToByteArray(int64(val)), NumSize: Bit64, Type: Int}, nil
 }
 
 func ConvertToSection(section string) (Section, error) {

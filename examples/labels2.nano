@@ -1,6 +1,8 @@
 cmp reg0, 5
-jnz end
+jnz :end
 sub reg0, 1
 :end
-inc reg0
+add reg0, 1
+printi reg0
+halt
 ; NANO_TEST_EXPECT_RETURN=1

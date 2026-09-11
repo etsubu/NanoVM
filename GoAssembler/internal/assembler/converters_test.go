@@ -67,37 +67,37 @@ func TestConvertToInValidSection(t *testing.T) {
 }
 
 func TestConvertToNumberWithLabel(t *testing.T) {
-	if n, err := ConvertToNumber(":label"); err != nil {
+	if n, err := ConvertToNumber(":label", false); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
 		if n.Label != ":label" {
 			t.Errorf("number conversion did not parse right label name %s vs %s", n.Label, ":label")
 		}
-		if n.Sign != Signed || n.Type != Int || n.NumSize != Bit64 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Int || n.NumSize != Bit64 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 	}
 }
 
 func TestConvertToNumberWithSection(t *testing.T) {
-	if n, err := ConvertToNumber(".label"); err != nil {
+	if n, err := ConvertToNumber(".label", false); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
 		if n.Label != ".label" {
 			t.Errorf("number conversion did not parse right label name %s vs %s", n.Label, ".label")
 		}
-		if n.Sign != Signed || n.Type != Int || n.NumSize != Bit64 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Int || n.NumSize != Bit64 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 	}
 }
 
 func TestConvertToNumberInt8(t *testing.T) {
-	if n, err := ConvertToNumber("120"); err != nil {
+	if n, err := ConvertToNumber("120", false); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
-		if n.Sign != Unsigned || n.Type != Int || n.NumSize != Bit8 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Int || n.NumSize != Bit8 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 		if len(n.bytes) != 1 {
 			t.Errorf("number conversion did not produce right amount of bytes %d vs 1", len(n.bytes))
@@ -106,11 +106,11 @@ func TestConvertToNumberInt8(t *testing.T) {
 }
 
 func TestConvertToNumberInt16(t *testing.T) {
-	if n, err := ConvertToNumber("260"); err != nil {
+	if n, err := ConvertToNumber("260", false); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
-		if n.Sign != Unsigned || n.Type != Int || n.NumSize != Bit16 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Int || n.NumSize != Bit16 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 		if len(n.bytes) != 2 {
 			t.Errorf("number conversion did not produce right amount of bytes %d vs 2", len(n.bytes))
@@ -119,11 +119,11 @@ func TestConvertToNumberInt16(t *testing.T) {
 }
 
 func TestConvertToNumberInt32(t *testing.T) {
-	if n, err := ConvertToNumber("4294967295"); err != nil {
+	if n, err := ConvertToNumber("4294967295", false); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
-		if n.Sign != Unsigned || n.Type != Int || n.NumSize != Bit32 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Int || n.NumSize != Bit32 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 		if len(n.bytes) != 4 {
 			t.Errorf("number conversion did not produce right amount of bytes %d vs 4", len(n.bytes))
@@ -132,11 +132,11 @@ func TestConvertToNumberInt32(t *testing.T) {
 }
 
 func TestConvertToNumberInt64(t *testing.T) {
-	if n, err := ConvertToNumber("4294967296"); err != nil {
+	if n, err := ConvertToNumber("4294967296", false); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
-		if n.Sign != Unsigned || n.Type != Int || n.NumSize != Bit64 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Int || n.NumSize != Bit64 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 		if len(n.bytes) != 8 {
 			t.Errorf("number conversion did not produce right amount of bytes %d vs 8", len(n.bytes))
@@ -145,11 +145,11 @@ func TestConvertToNumberInt64(t *testing.T) {
 }
 
 func TestConvertToSignedInt8(t *testing.T) {
-	if n, err := ConvertToNumber("-120"); err != nil {
+	if n, err := ConvertToNumber("-120", true); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
-		if n.Sign != Signed || n.Type != Int || n.NumSize != Bit8 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Int || n.NumSize != Bit8 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 		if len(n.bytes) != 1 {
 			t.Errorf("number conversion did not produce right amount of bytes %d vs 1", len(n.bytes))
@@ -158,11 +158,11 @@ func TestConvertToSignedInt8(t *testing.T) {
 }
 
 func TestConvertToSignedInt16(t *testing.T) {
-	if n, err := ConvertToNumber("-140"); err != nil {
+	if n, err := ConvertToNumber("-140", true); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
-		if n.Sign != Signed || n.Type != Int || n.NumSize != Bit16 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Int || n.NumSize != Bit16 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 		if len(n.bytes) != 2 {
 			t.Errorf("number conversion did not produce right amount of bytes %d vs 2", len(n.bytes))
@@ -171,11 +171,11 @@ func TestConvertToSignedInt16(t *testing.T) {
 }
 
 func TestConvertToSignedInt32(t *testing.T) {
-	if n, err := ConvertToNumber("-32769"); err != nil {
+	if n, err := ConvertToNumber("-32769", true); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
-		if n.Sign != Signed || n.Type != Int || n.NumSize != Bit32 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Int || n.NumSize != Bit32 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 		if len(n.bytes) != 4 {
 			t.Errorf("number conversion did not produce right amount of bytes %d vs 4", len(n.bytes))
@@ -184,11 +184,11 @@ func TestConvertToSignedInt32(t *testing.T) {
 }
 
 func TestConvertToSignedInt64(t *testing.T) {
-	if n, err := ConvertToNumber("-2147483649"); err != nil {
+	if n, err := ConvertToNumber("-2147483649", true); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
-		if n.Sign != Signed || n.Type != Int || n.NumSize != Bit64 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Int || n.NumSize != Bit64 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 		if len(n.bytes) != 8 {
 			t.Errorf("number conversion did not produce right amount of bytes %d vs 8", len(n.bytes))
@@ -197,11 +197,11 @@ func TestConvertToSignedInt64(t *testing.T) {
 }
 
 func TestConvertToFloat64(t *testing.T) {
-	if n, err := ConvertToNumber("-21.1239"); err != nil {
+	if n, err := ConvertToNumber("-21.1239", true); err != nil {
 		t.Errorf("invalid section did not error")
 	} else {
-		if n.Sign != Signed || n.Type != Float || n.NumSize != Bit64 {
-			t.Errorf("number conversion did not set right flags %d, %d, %d", n.Sign, n.Type, n.NumSize)
+		if n.Type != Float || n.NumSize != Bit64 {
+			t.Errorf("number conversion did not set right flags %d, %d", n.Type, n.NumSize)
 		}
 		if len(n.bytes) != 8 {
 			t.Errorf("number conversion did not produce right amount of bytes %d vs 8", len(n.bytes))
@@ -210,7 +210,7 @@ func TestConvertToFloat64(t *testing.T) {
 }
 
 func TestInvalidConversion(t *testing.T) {
-	if _, err := ConvertToNumber("-21.12a39"); err == nil {
+	if _, err := ConvertToNumber("-21.12a39", true); err == nil {
 		t.Errorf("converted invalid number withour errors")
 	}
 }
@@ -242,7 +242,39 @@ func TestNumberToByteArrayIsLittleEndian(t *testing.T) {
 }
 
 func TestConvertToNumberRejectsEmptyValue(t *testing.T) {
-	if _, err := ConvertToNumber(""); err == nil {
+	if _, err := ConvertToNumber("", false); err == nil {
 		t.Errorf("converting an empty value succeeded, want an error")
+	}
+}
+
+func TestConvertToNumberWidthFollowsOpcodeExtension(t *testing.T) {
+	tests := []struct {
+		value  string
+		signed bool
+		want   Size
+	}{
+		{"255", false, Bit8},
+		{"255", true, Bit16},
+		{"127", true, Bit8},
+		{"65535", false, Bit16},
+		{"65535", true, Bit32},
+		{"4294967295", false, Bit32},
+		{"4294967295", true, Bit64},
+		{"-1", true, Bit8},
+		{"-1", false, Bit64},
+		{"-129", true, Bit16},
+	}
+	for _, tc := range tests {
+		n, err := ConvertToNumber(tc.value, tc.signed)
+		if err != nil {
+			t.Errorf("ConvertToNumber(%q, %v) errored: %v", tc.value, tc.signed, err)
+			continue
+		}
+		if n.NumSize != tc.want {
+			t.Errorf("ConvertToNumber(%q, %v) chose size %d, want %d", tc.value, tc.signed, n.NumSize, tc.want)
+		}
+		if len(n.bytes) != 1<<n.NumSize {
+			t.Errorf("ConvertToNumber(%q, %v) produced %d bytes for size %d", tc.value, tc.signed, len(n.bytes), n.NumSize)
+		}
 	}
 }

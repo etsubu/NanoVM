@@ -9,12 +9,12 @@ import (
 type DataType int
 type Size int
 type FloatOrInt int
-type SignedOrUnsigned int
 
 type Opcode struct {
 	opcode          int
 	size            int
 	RelativeAddress bool
+	SignedSource    bool
 }
 
 const (
@@ -34,11 +34,6 @@ const (
 	Float FloatOrInt = 1
 )
 
-const (
-	Unsigned SignedOrUnsigned = 0
-	Signed   SignedOrUnsigned = 1
-)
-
 type Instruction struct {
 	opcode     Opcode
 	dstReg     Registry
@@ -46,30 +41,48 @@ type Instruction struct {
 	sourceReg  Registry
 	sourceSize Size
 	isInt      FloatOrInt
-	isSigned   SignedOrUnsigned
 	immediate  Number
 	RawLine    string
 	LineNumber int
 }
 
 func (i *Instruction) Assemble() []byte {
-	var bytes = make([]byte, 1, 10)
-	bytes[0] = byte(i.opcode.opcode)
-	bytes[0] |= byte(i.dstReg.reg) << 5
+	// Build the 16-bit instruction header
+	//
+	//   bits 15-13: dstReg
+	//   bits 12-7 : opcode
+	//   bit  6    : reserved
+	//   bit  5    : source type
+	//   bits 4-3  : source size
+	//   bits 2-0  : source register
+	//
+	// Header is stored little-endian
+
+	var header uint16
+
+	header |= uint16(i.opcode.opcode) << 7
+	header |= uint16(i.dstReg.reg) << 13
+
 	if i.opcode.size == 0 {
-		return bytes
-	}
-	operands := byte(i.sourceType)
-	operands |= byte(i.sourceSize) << 1
-	operands |= byte(i.isInt) << 3
-	operands |= byte(i.isSigned) << 4
-	operands |= byte(i.sourceReg.reg) << 5
-	bytes = append(bytes, operands)
-	if i.sourceType == Immediate {
-		if i.immediate.isResolved() {
-			bytes = append(bytes, i.immediate.bytes...)
+		return []byte{
+			byte(header),
+			byte(header >> 8),
 		}
 	}
+
+	header |= uint16(i.sourceType) << 5
+	header |= uint16(i.sourceSize) << 3
+	header |= uint16(i.sourceReg.reg)
+
+	bytes := []byte{
+		byte(header),
+		byte(header >> 8),
+	}
+
+	if i.sourceType == Immediate && i.immediate.isResolved() {
+		bytes = append(bytes, i.immediate.bytes...)
+	}
+
 	return bytes
 }
 
@@ -86,7 +99,6 @@ func (i Instruction) InstructionLength() int {
 
 type Number struct {
 	bytes   []byte
-	Sign    SignedOrUnsigned
 	NumSize Size
 	Type    FloatOrInt
 	Label   string
@@ -98,7 +110,6 @@ func (n Number) isResolved() bool {
 
 type Registry struct {
 	reg     int
-	Signed  SignedOrUnsigned
 	NumSize Size
 	Type    FloatOrInt
 }
@@ -132,56 +143,39 @@ func NewAssembler() *Assembler {
 	opcodeMap["and"] = Opcode{opcode: 3, size: 2}
 	opcodeMap["or"] = Opcode{opcode: 4, size: 2}
 	opcodeMap["xor"] = Opcode{opcode: 5, size: 2}
-	opcodeMap["sar"] = Opcode{opcode: 6, size: 2}
-	opcodeMap["sal"] = Opcode{opcode: 7, size: 2}
-	opcodeMap["ror"] = Opcode{opcode: 8, size: 2}
-	opcodeMap["rol"] = Opcode{opcode: 9, size: 2}
-	opcodeMap["mul"] = Opcode{opcode: 10, size: 2}
-	opcodeMap["div"] = Opcode{opcode: 11, size: 2}
-	opcodeMap["mod"] = Opcode{opcode: 12, size: 2}
-	opcodeMap["cmp"] = Opcode{opcode: 13, size: 2}
+	opcodeMap["shr"] = Opcode{opcode: 6, size: 2}
+	opcodeMap["shl"] = Opcode{opcode: 7, size: 2}
+	opcodeMap["mul"] = Opcode{opcode: 8, size: 2}
+	opcodeMap["div"] = Opcode{opcode: 9, size: 2}
+	opcodeMap["mod"] = Opcode{opcode: 10, size: 2}
+	opcodeMap["cmp"] = Opcode{opcode: 11, size: 2}
 
-	opcodeMap["jz"] = Opcode{opcode: 14, size: 1, RelativeAddress: true}
-	opcodeMap["jnz"] = Opcode{opcode: 15, size: 1, RelativeAddress: true}
-	opcodeMap["jg"] = Opcode{opcode: 16, size: 1, RelativeAddress: true}
-	opcodeMap["js"] = Opcode{opcode: 17, size: 1, RelativeAddress: true}
-	opcodeMap["jmp"] = Opcode{opcode: 18, size: 1, RelativeAddress: true}
-	opcodeMap["not"] = Opcode{opcode: 19, size: 1}
-	opcodeMap["inc"] = Opcode{opcode: 20, size: 1}
-	opcodeMap["dec"] = Opcode{opcode: 21, size: 1}
-	opcodeMap["call"] = Opcode{opcode: 22, size: 1, RelativeAddress: true}
-	opcodeMap["push"] = Opcode{opcode: 23, size: 1}
-	opcodeMap["pop"] = Opcode{opcode: 24, size: 1}
-	opcodeMap["ret"] = Opcode{opcode: 25, size: 0}
-	opcodeMap["halt"] = Opcode{opcode: 26, size: 0}
-	opcodeMap["load"] = Opcode{opcode: 27, size: 2}
-	opcodeMap["store"] = Opcode{opcode: 28, size: 2}
-	opcodeMap["syscall"] = Opcode{opcode: 29, size: 2}
+	opcodeMap["jz"] = Opcode{SignedSource: true, opcode: 12, size: 1, RelativeAddress: true}
+	opcodeMap["jnz"] = Opcode{SignedSource: true, opcode: 13, size: 1, RelativeAddress: true}
+	opcodeMap["jg"] = Opcode{SignedSource: true, opcode: 14, size: 1, RelativeAddress: true}
+	opcodeMap["js"] = Opcode{SignedSource: true, opcode: 15, size: 1, RelativeAddress: true}
+	opcodeMap["jmp"] = Opcode{SignedSource: true, opcode: 16, size: 1, RelativeAddress: true}
+	opcodeMap["not"] = Opcode{opcode: 17, size: 1}
+	opcodeMap["call"] = Opcode{SignedSource: true, opcode: 18, size: 1, RelativeAddress: true}
+	opcodeMap["push"] = Opcode{opcode: 19, size: 1}
+	opcodeMap["pop"] = Opcode{opcode: 20, size: 1}
+	opcodeMap["ret"] = Opcode{opcode: 21, size: 0}
+	opcodeMap["halt"] = Opcode{opcode: 22, size: 0}
+	opcodeMap["load"] = Opcode{opcode: 23, size: 2}
+	opcodeMap["store"] = Opcode{opcode: 24, size: 2}
+	opcodeMap["syscall"] = Opcode{opcode: 25, size: 2}
+	opcodeMap["printi"] = Opcode{opcode: 26, size: 1}
 
-	registerMap["reg0"] = Registry{reg: 0, Signed: Unsigned, NumSize: Bit64, Type: Int}
-	registerMap["reg1"] = Registry{reg: 1, Signed: Unsigned, NumSize: Bit64, Type: Int}
-	registerMap["reg2"] = Registry{reg: 2, Signed: Unsigned, NumSize: Bit64, Type: Int}
-	registerMap["reg3"] = Registry{reg: 3, Signed: Unsigned, NumSize: Bit64, Type: Int}
-	registerMap["reg4"] = Registry{reg: 4, Signed: Unsigned, NumSize: Bit64, Type: Int}
-	registerMap["reg5"] = Registry{reg: 5, Signed: Unsigned, NumSize: Bit64, Type: Int}
-	registerMap["reg6"] = Registry{reg: 6, Signed: Unsigned, NumSize: Bit64, Type: Int}
-	registerMap["sp"] = Registry{reg: 7, Signed: Unsigned, NumSize: Bit64, Type: Int}
-	registerMapTypeExtensions := make(map[string]Registry, 16)
-	for key, val := range registerMap {
-		registerMapTypeExtensions[key] = val
-		registerMapTypeExtensions[key+".8"] = Registry{reg: val.reg, Signed: Unsigned, NumSize: Bit8, Type: Int}
-		registerMapTypeExtensions[key+".16"] = Registry{reg: val.reg, Signed: Unsigned, NumSize: Bit16, Type: Int}
-		registerMapTypeExtensions[key+".32"] = Registry{reg: val.reg, Signed: Unsigned, NumSize: Bit32, Type: Int}
-		registerMapTypeExtensions[key+".64"] = Registry{reg: val.reg, Signed: Unsigned, NumSize: Bit64, Type: Int}
-		registerMapTypeExtensions[key+".8s"] = Registry{reg: val.reg, Signed: Signed, NumSize: Bit8, Type: Int}
-		registerMapTypeExtensions[key+".16s"] = Registry{reg: val.reg, Signed: Signed, NumSize: Bit16, Type: Int}
-		registerMapTypeExtensions[key+".32s"] = Registry{reg: val.reg, Signed: Signed, NumSize: Bit32, Type: Int}
-		registerMapTypeExtensions[key+".64s"] = Registry{reg: val.reg, Signed: Signed, NumSize: Bit64, Type: Int}
-		registerMapTypeExtensions[key+".32f"] = Registry{reg: val.reg, Signed: Signed, NumSize: Bit32, Type: Float}
-		registerMapTypeExtensions[key+".64f"] = Registry{reg: val.reg, Signed: Signed, NumSize: Bit64, Type: Float}
-	}
+	registerMap["reg0"] = Registry{reg: 0, NumSize: Bit64, Type: Int}
+	registerMap["reg1"] = Registry{reg: 1, NumSize: Bit64, Type: Int}
+	registerMap["reg2"] = Registry{reg: 2, NumSize: Bit64, Type: Int}
+	registerMap["reg3"] = Registry{reg: 3, NumSize: Bit64, Type: Int}
+	registerMap["reg4"] = Registry{reg: 4, NumSize: Bit64, Type: Int}
+	registerMap["reg5"] = Registry{reg: 5, NumSize: Bit64, Type: Int}
+	registerMap["bp"] = Registry{reg: 6, NumSize: Bit64, Type: Int}
+	registerMap["sp"] = Registry{reg: 7, NumSize: Bit64, Type: Int}
 
-	a := Assembler{code: "", OpcodeMap: opcodeMap, RegisterMap: registerMapTypeExtensions}
+	a := Assembler{code: "", OpcodeMap: opcodeMap, RegisterMap: registerMap}
 	return &a
 }
 
@@ -288,9 +282,8 @@ func (a *Assembler) ParseInstructions(code string) (InstructionSet, error) {
 					instruction.sourceType = Register
 					instruction.sourceSize = reg.NumSize
 					instruction.isInt = reg.Type
-					instruction.isSigned = reg.Signed
 				} else {
-					immediate, err := ConvertToNumber(sourceValue)
+					immediate, err := ConvertToNumber(sourceValue, instruction.opcode.SignedSource)
 					if err != nil {
 						return InstructionSet{}, &AssemblerError{lineNumber: i + 1, line: line, message: "Value not recognized as number or registry " + sourceValue}
 					}
@@ -298,7 +291,6 @@ func (a *Assembler) ParseInstructions(code string) (InstructionSet, error) {
 					instruction.immediate = immediate
 					instruction.sourceSize = immediate.NumSize
 					instruction.isInt = immediate.Type
-					instruction.isSigned = immediate.Sign
 				}
 			}
 		} else {
@@ -306,7 +298,7 @@ func (a *Assembler) ParseInstructions(code string) (InstructionSet, error) {
 				return InstructionSet{}, &AssemblerError{lineNumber: i + 1, line: line, message: "First operand must be a register " + dstRegStr}
 			}
 			// was not register, this might be for example "jnz -123"
-			immediate, err := ConvertToNumber(dstRegStr)
+			immediate, err := ConvertToNumber(dstRegStr, instruction.opcode.SignedSource)
 			if err != nil {
 				return InstructionSet{}, &AssemblerError{lineNumber: i + 1, line: line, message: "Value not recognized as number or registry " + dstRegStr}
 			}
@@ -314,7 +306,6 @@ func (a *Assembler) ParseInstructions(code string) (InstructionSet, error) {
 			instruction.immediate = immediate
 			instruction.sourceSize = immediate.NumSize
 			instruction.isInt = immediate.Type
-			instruction.isSigned = immediate.Sign
 		}
 		instructions = append(instructions, instruction)
 	}
