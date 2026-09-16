@@ -54,47 +54,33 @@ func ConvertToNumber(value string, signed bool) (Number, error) {
 		}
 		return Number{bytes: NumberToByteArray(f), NumSize: Bit64, Type: Float}, nil
 	}
-	// The opcode alone decides how the VM extends the immediate, so the width has to
-	// be one the opcode's own extension rule reproduces exactly.
-	if value[0] == '-' {
-		val, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			return Number{}, err
-		}
-		if !signed {
-			// Zero extension can only reproduce a negative literal at full width
-			return Number{bytes: NumberToByteArray(val), NumSize: Bit64, Type: Int}, nil
-		}
-		if val >= math.MinInt8 {
+	val, err := strconv.ParseInt(value, 0, 64)
+	if err != nil {
+		return Number{}, err
+	}
+	if signed {
+		if val >= math.MinInt8 && val <= math.MaxInt8 {
 			return Number{bytes: NumberToByteArray(int8(val)), NumSize: Bit8, Type: Int}, nil
 		}
-		if val >= math.MinInt16 {
+		if val >= math.MinInt16 && val <= math.MaxInt16 {
 			return Number{bytes: NumberToByteArray(int16(val)), NumSize: Bit16, Type: Int}, nil
 		}
-		if val >= math.MinInt32 {
+		if val >= math.MinInt32 && val <= math.MaxInt32 {
 			return Number{bytes: NumberToByteArray(int32(val)), NumSize: Bit32, Type: Int}, nil
 		}
 		return Number{bytes: NumberToByteArray(val), NumSize: Bit64, Type: Int}, nil
 	}
-	val, err := strconv.ParseUint(value, 10, 64)
-	if err != nil {
-		return Number{}, err
+	uval := uint64(val)
+	if uval <= math.MaxUint8 {
+		return Number{bytes: NumberToByteArray(uint8(uval)), NumSize: Bit8, Type: Int}, nil
 	}
-	// Sign extension is only a no-op while the top bit of the chosen width is clear
-	max8, max16, max32 := uint64(math.MaxUint8), uint64(math.MaxUint16), uint64(math.MaxUint32)
-	if signed {
-		max8, max16, max32 = math.MaxInt8, math.MaxInt16, math.MaxInt32
+	if uval <= math.MaxUint16 {
+		return Number{bytes: NumberToByteArray(uint16(uval)), NumSize: Bit16, Type: Int}, nil
 	}
-	if val <= max8 {
-		return Number{bytes: NumberToByteArray(uint8(val)), NumSize: Bit8, Type: Int}, nil
+	if uval <= math.MaxUint32 {
+		return Number{bytes: NumberToByteArray(uint32(uval)), NumSize: Bit32, Type: Int}, nil
 	}
-	if val <= max16 {
-		return Number{bytes: NumberToByteArray(uint16(val)), NumSize: Bit16, Type: Int}, nil
-	}
-	if val <= max32 {
-		return Number{bytes: NumberToByteArray(uint32(val)), NumSize: Bit32, Type: Int}, nil
-	}
-	return Number{bytes: NumberToByteArray(val), NumSize: Bit64, Type: Int}, nil
+	return Number{bytes: NumberToByteArray(uval), NumSize: Bit64, Type: Int}, nil
 }
 
 func ConvertInt64ToNumber(val int64) (Number, error) {

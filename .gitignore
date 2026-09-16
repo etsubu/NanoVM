@@ -10,3 +10,4 @@ CMakeCache.txt
 DartConfiguration.tcl
 NanoVM.sln
 examples/*.nanoc
+cmake-build-*/

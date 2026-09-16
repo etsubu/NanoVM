@@ -5,9 +5,12 @@ int main(int argc, char *argv[])
 	if (argc <= 1) {
 		printf("Usage NanoDebugger.exe [FILE]\n");
 		fflush(stdout);
+		return 1;
 	}
 	NanoDebugger debugger;
-	NanoDebuggerInit(&debugger, argv[1]);
+	if (!NanoDebuggerInit(&debugger, argv[1])) {
+		return 1;
+	}
 	NanoDebuggerDebug(&debugger);
 	NanoDebuggerDestroy(&debugger);
 	return 0;

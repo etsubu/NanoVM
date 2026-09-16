@@ -1,7 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
 #include "NanoVM.h"
-#include "Instructions.h"
 
 struct NanoDebugger {
 	NanoVM vm;
@@ -13,9 +13,9 @@ struct NanoDebugger {
 
 typedef struct NanoDebugger NanoDebugger;
 
-void NanoDebuggerInit(NanoDebugger* debugger, const char* file);
+bool NanoDebuggerInit(NanoDebugger* debugger, const char* file);
 
-void NanoDebuggerInitFromMemory(NanoDebugger* debugger, unsigned char* bytecode, uint64_t size);
+bool NanoDebuggerInitFromMemory(NanoDebugger* debugger, unsigned char* bytecode, uint64_t size);
 
 void NanoDebuggerDestroy(NanoDebugger* debugger);
 

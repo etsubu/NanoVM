@@ -1,0 +1,3 @@
+mov reg4, 123
+syscall reg0, 3 ; syscall for index 3 corresponding to print integer in standard library
+halt

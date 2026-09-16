@@ -1,0 +1,7 @@
+alloc reg0, 500 ;heap allocate 500 bytes
+mov reg1, 123
+store reg0, reg1 ;write to heap
+load reg2, reg0
+printi reg2
+mov reg0, 0
+halt
