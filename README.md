@@ -1,5 +1,5 @@
 ﻿# NanoVM
-PoC lightweight x64 VM implementation
+Embeddable lightweight x64 register based VM implementation
 
 ### Table of contents
 
@@ -16,30 +16,36 @@ PoC lightweight x64 VM implementation
 
 ## General 
 
-NanoVM is cross-platform register based turing complete VM with stack memory. The project also includes assembler and debugger with similiar syntax to x86 asm with intel syntax. 
-Note that the project is still in very early development and many things including the insturction set and format is a subject to change, so bytecode from previous versions might not work in future. 
-The documentation will be updated when changes happen.
+NanoVM is cross-platform register based VM with stack memory and heap memory. The goal of the vm core is to be small and embeddable while staying close to POSIX compliant allowing to target different platforms and architectures like webasm for example. Performance is considered opportunistically but is less of priority.
 
-The longer term goal of the project is to be embeddable VM with a small bytecode format while maintaining reasonable performance speed. 
-Syscall instruction that contains some implemented functions like IO but user can register custom functions as callbacks for different syscall function values will be added eventually when the bytecode format has been finalized. 
-This allows one to implement more "outside of the VM" functionality". Performance comparison tests to other languages will be added later. 
-Longer term goal is to eventually actually program the Compiler/Assembler in NanoVM bytecode. 
+Note that the project is a work in progress and bytecode format, opcodes or any part is subject to change without any backwards compatibility.
 
-Note that even though the VM does do bounds checking for read write and execute operations on memory these checks are more for catching bugs in the code + avoiding VM crashing, and not so much about hardening the VM. 
-Escaping the VM sandbox is likely very trivial. 
-However, if you notice a way to read, write or execute memory outside of the VM I'll gladly fix those. 
-That being said **!this VM should not be used to run unknown and potentially hostile code!**. 
-Also stuff like executing stack memory is currently possible and this is made on purpose to allow dynamic code generation or encryption. 
-Read/write/execute permissions to memory pages might be added in future.
+## Getting started
+
+Start with [build instructions](#how-to-build)
+
+See examples/ folder for example bytecode programs used as test cases.
+
+Assemble test program to bytecode and run it:
+```
+./NanoAssembler examples/fibonacciSequence.nano
+./NanoVM examples/fibonacciSequence.nanoc
+```
+
+Run the program with debugger:
+```
+./NanoDebugger examples/fibonacciSequence.nanoc
+```
+
 
 ## How to build
 
 Build instructions have been tested on Windows and Debian based linux distros
 
-### Windows (Visual Studio 2019)
+### Windows (Visual Studio)
 
-You need to have Visual Studio 2019 and cmake installed on your system.\
-Visual Studio 2019 is compatible with cmake projects so you can build the project by opening the project in visual studio, right click the root CMakeLists.txt -> "Generate Cache for NanoVM". This will generate the cmake cache for you and now you can build the project by selecting 
+You need to have Visual Studio and cmake installed on your system.\
+Visual Studio is compatible with cmake projects so you can build the project by opening the project in visual studio, right click the root CMakeLists.txt -> "Generate Cache for NanoVM". This will generate the cmake cache for you and now you can build the project by selecting 
 from the menu bar: Build -> Build all.\
 If you rather wish to generate visual studio specific build files you can do that by running the following command in the project root with cmd/powershell:
 
@@ -65,9 +71,21 @@ make
 ```
 This will build all the binaries in their own folders along the source files.
 
+
+### Assembler build
+
+Assembler is written in go so go needs to be installed https://go.dev/doc/install
+
+```
+cd GoAssembler
+go build -o NanoAssembler ./cmd
+```
+
 ## VM architecture
 
-The VM memory are defined as pages which by default are 4096 bytes each. When initialized the VM bytecode will be placed at the bottom of the allocated memory followed by the stack memory base on the next page. While the VM is similiar to x86 the stack grows up unlike in x86. This can be utilized to dynamically increase the stack memory if required with minimal effort.
+The VM memory are defined as pages which by default are 4096 bytes each. When initialized the VM bytecode will be placed at the bottom of the allocated memory followed by the stack memory and finally heap memory. This allows to grow heap memory dynamically if needed.
+
+NanoVM memory follows Little Endian (LSB) encoding.
 
 ### Memory layout
 
@@ -89,7 +107,7 @@ The VM memory are defined as pages which by default are 4096 bytes each. When in
         Lower memory addresses
 
 ### Registers
-The VM is register based so the instuctions utilize different registers. Registers are encoded with 3 bits so there are 8 registers in total (the names will change in future):
+The VM registers are encoded with 3 bits so there are 8 registers in total (the names will change in future) and they are 64-bit signed integers.
 
 | Register        | Number        | Description                                  |
 | -------------   |:-------------:| --------------------------------------------:|
@@ -99,8 +117,8 @@ The VM is register based so the instuctions utilize different registers. Registe
 | Reg3            | 3             | General purpose.                             |
 | Reg4            | 4             | General purpose.                             |
 | Reg5            | 5             | General purpose.                             |
-| Reg6            | 6             | General purpose.                             |
-| SP              | 7             | Stack pointer. Points to the top of the stack|
+| bp              | 6             | Base pointer. Used for stack frames          |
+| sp              | 7             | Stack pointer. Points to the top of the stack|
 
 ### Instructions
 Instructions have always an opcode and 0-2 operands. Below is the instruction encoding defined from LSB to MSB
@@ -115,7 +133,7 @@ So most of the instructions are encoded in 2 bytes + immediate value if used. In
 Halt ; Stops the execution and exits the VM execution
 ret ; Pops value from the top of the stack and performs absolute jump to that address. Updates stack pointer
 ```
-Instructions that use 1 operand encode a register operand in the destination register field with source type Reg, and an immediate operand in the immediate value with source type Immediate. The source register field is unused, so a decoder has to read the source type bit to know which field holds the operand. A register operand is always read at the full 64 bits, because the descriptor byte of this form carries no size. Opcodes that use 1 operand:
+Instructions that use 1 operand encode a register operand in the source register field with source type Reg, and an immediate operand in the immediate value with source type Immediate. The destination register field is unused. Opcodes that use 1 operand:
 ```assembly
 	Jz; Jump if zero flag is set. Example: jz reg0
 	Jnz; Jump if zero flag is not set. Example: jnz reg0
@@ -126,13 +144,13 @@ Instructions that use 1 operand encode a register operand in the destination reg
 	Call; Pushes the next instructions absolute memory address to the stack and jumps to the given address. Updates stack pointer. Example: call reg0
 	Push; Pushes value to the top of the stack. Example: push reg0
 	Pop; Pops value from the top of the stack and moves the value to given register. Example: pop reg0
+	free; Free heap memory allocation in the given address. Example free reg0
+	inc; Increment the register by one and update ZERO_FLAG. Example: inc reg0
+	Dec; Decrease the register by one and update ZERO_FLAG. Example: dec reg0
 ```
 Push and pop always move a full 64 bit slot so that call and ret agree on the size of a return address.
 
-An immediate jump or call target is a relative offset measured from the start of the jump instruction itself, not from the instruction that follows it. A register jump or call target is an absolute address, which is what makes indirect calls work, since a label used with any other instruction also resolves to an absolute address:
-```assembly
-mov reg0, :func ; absolute address of func
-call reg0       ; absolute jump
+An immediate jump or call target is a relative offset measured from the start of the jump instruction itself, not from the instruction that follows it.
 ```
 Instructions with 2 operands:
 ```assembly
@@ -142,44 +160,44 @@ Instructions with 2 operands:
 	And; and reg0, reg1 <=> reg0 &= reg1
 	Or;  or reg0, reg1 <=> reg0 |= reg1
 	Xor; xor reg0, reg1 <=> reg0 ^= reg1
-	Shl; shl reg0, reg1 <=> reg0 <<= reg1 | The shift count is taken modulo 64
-	Shr; shr reg0, reg1 <=> logical shift right, shifts in zeroes
-	Shr_s; shr_s reg0, reg1 <=> arithmetic shift right, shifts in the sign bit
+	Shl; shl reg0, reg1 <=> reg0 <<= reg1, shift left
+	Shr; shr reg0, reg1 <=> reg0 >>= reg1, shift right
 	Mul; mul reg0, reg1 <=> reg0 *= reg1
-	Div; div reg0, reg1 <=> unsigned division
-	Div_s; div_s reg0, reg1 <=> signed division
-	Mod; mod reg0, reg1 <=> unsigned remainder
-	Mod_s; mod_s reg0, reg1 <=> signed remainder
-	Cmp; cmp reg0, reg1 | Compares the 2 values as unsigned and sets flags depending on the comparison
-	Cmp_s; cmp_s reg0, reg1 | Compares the 2 values as signed
-	Load; load reg0, reg1 <=> reg0 = memory at the address in reg1. The source size is the access width, so "load reg0, reg1.8" reads a single byte. The address operand must be a register
-	Store; store reg0, reg1 <=> memory at the address in reg0 = reg1. Note that here the destination register holds the address and the source holds the value
-	Syscall; syscall reg0, 1 | Performs the syscall named by the source operand and stores its result in the destination register
+	Div; div reg0, reg1 <=> reg0 /= reg1
+	Mod; mod reg0, reg1 <=> reg0 %= reg1
+	Cmp; cmp reg0, reg1 | Compares the 2 values as signed integers and sets comparison flags
+	Load; load reg0, reg1 <=> Reads 64-bit value from address reg1 to reg0
+	Load8; load reg0, reg1 <=> Reads 8-bit signed integer from address reg1 to reg0
+	Load8u; load reg0, reg1 <=> Reads 8-bit unsigned integer from address reg1 to reg0
+	Store; store reg0, reg1 <=> Writes value of reg1 to memory address at reg0
+	Store8; store reg0, reg1 <=> Writes first 8 bits of reg1 as signed int to memory address at reg0
+	Store8; store reg0, reg1 <=> Writes first 8 bits of reg1 as unsigned int to memory address at reg0
+	printi; printi reg0 <=> Prints integer value to stdout. Deprecated and probably replaced by syscalls
+	alloc reg0, reg1 <=> Allocates reg1 amount of heap memory bytes and stores pointer to reg0
+	Syscall; syscall reg0, reg1 | Performs syscall pointed by reg1 and stores return value to reg0
 ```
 
-### Signed and unsigned
-The encoding carries no sign bit. The opcode alone decides how its operands are interpreted, so any operation whose result differs between a signed and an unsigned reading has a separate `_s` opcode: `div_s`, `mod_s`, `cmp_s` and `shr_s`. Everything else (`add`, `sub`, `mul`, `and`, `or`, `xor`, `shl`, `not`, `mov`) produces the same bits either way and needs no variant.
-
-The same rule decides how a narrow source is widened to 64 bits: an `_s` opcode sign extends its source, every other opcode zero extends it. Jump and call displacements are always sign extended. Because of this the assembler picks an immediate width that the opcode's own extension rule reproduces exactly, so `mov reg0, -1` needs the full 8 bytes while `div_s reg0, -1` fits in one.
-
-Only `cmp` and `cmp_s` write the flags. The three flags are mutually exclusive, so `jg` means strictly greater and `js` strictly smaller.
 
 ### Syscalls
-The print instructions were replaced by `syscall`, which takes its arguments from the stack and writes its result to the destination register:
 
-| Number | Name | Behaviour |
-| ------ |:----:| ---------:|
-| 0 | write string | Pops an address and writes the null terminated string at it. Returns the number of bytes written |
-| 1 | write integer | Pops a value and writes it as a signed decimal. Returns the number of bytes written |
-| 2 | write character | Pops a value and writes its lowest byte as an ASCII character. Returns 1 |
-| 3 | exit | Pops a value, stores it in reg0 and halts the VM |
+Syscall is a special instruction that allows the bytecode program to call functions that are outside of regular VM behavior. The VM core supports attaching a syscall table which allows the embedding program to write the syscalls their project might need. This is the mechanism that keeps the VM extendable per project needs.
+Syscalls could allow for example interacting with the filesystem, open network sockets and so on, but the VM core has loose coupling on purpose to keep the implementation size small.
 
-ToDo:
-* Add data sections so that string literals can be placed in memory without pushing them a byte at a time
-* Add an instruction for converting between integers and floats
+Some standard library implementation that can optionally be registered and compiled will be implemented but kept trivial on purpose.
+
+syscalls work as following
+```
+syscall reg0, 1
+```
+Where reg0 will receive the syscall return value and 1 defines what syscall number to call. Syscall function receives handle to the NanoVM and is responsible for determining the arguments either from registers or stack. Note that syscall implementations access the VM memory so memory safety is the responsibility of the implementation. Helper functions are provided and usage is recommended. Fuzzing or other tests won't cover custom syscall implementations.
+
+#### Recommended syscall contract
+
+Use reg4-reg6 as first arguments for the syscall to avoid having to push/pop stack memory for functions with low amount of arguments. For more arguments, use NanoVM stack pop functionality, and for pointers to memory use the NanoVM read/write memory helpers as they will ensure memory operations stay within VM memory bounds.
 
 # NanoAssembler
-NanoAssembler is currently a minimalistic assembler for NanoVM. The assembler was made to aid in making simple programs and tests. This project is not so much about making a "programming language" but rather the core VM which could be used as the base which some programming language is compiled to. When more advanced features will be introduced I'll consider creating a new compiler project and leave the assembler for the low level operations.
+NanoAssembler is currently a rough assembler implementation for NanoVM. The assembler was made to aid in making simple programs and tests. This project is not so much about making a "programming language" but rather the core VM which could be used as the base which some programming language is compiled to. Proper assembler should implement lexer, parser and assembler but the assembler is lower priority for this project.
+
 Currently the assembler supports comments with prefix ';' and uses regex to filter multiple whitespaces to help in processing the input. The assembler also suppors labels which are defined by ':' prefix. This will be mapped to a memory address that points to the next instruction after label. Example:
 ```assembly
 ; The assembler supports comments
@@ -189,21 +207,16 @@ Currently the assembler supports comments with prefix ';' and uses regex to filt
 xor reg0, reg0 ; zero out reg0
 :label
 printi reg0 ; Label points here
-printc '\n' ; The assembler can map characters defined with '' and special characters line \n \r \t to their ascii values
-; The above line is the same as printc 10
+
 inc reg0 ; reg0++
 cmp reg0, 0x10 ; compare reg0 to 0x10 in hex which is the same as cmp reg0, 10
 ; The assembler understands base10 and base16 values
 jnz label    ; if reg0 != 10 jump to label
 ; The above code will print numbers
 ```
-ToDo:
-* Add macros. These would help to reduce the amount of code that needs to be written.
-* Add include tags which would allow to write "standard libraries" which could be included to the project
-* Size definitions for registers
-* ...
 
-The assembler projects code is not currently clean and the development for that will be most likely be stopped eventually and a new compiler project will be started. Probably with external library for parsing the programming language. I will try and keep the assembler simple
+
+The assembler project's code is quite rough and the development for that will most likely be transferred to a separate repository when the VM core is more stable.
 
 # NanoDebugger
 
