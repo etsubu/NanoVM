@@ -151,7 +151,7 @@ Instructions that use 1 operand encode a register operand in the source register
 Push and pop always move a full 64 bit slot so that call and ret agree on the size of a return address.
 
 An immediate jump or call target is a relative offset measured from the start of the jump instruction itself, not from the instruction that follows it.
-```
+
 Instructions with 2 operands:
 ```assembly
 	Mov; mov reg0, reg1 <=> reg0 = reg1
