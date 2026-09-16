@@ -173,7 +173,7 @@ Instructions with 2 operands:
 	Store8; store reg0, reg1 <=> Writes first 8 bits of reg1 as signed int to memory address at reg0
 	Store8; store reg0, reg1 <=> Writes first 8 bits of reg1 as unsigned int to memory address at reg0
 	printi; printi reg0 <=> Prints integer value to stdout. Deprecated and probably replaced by syscalls
-	alloc reg0, reg1 <=> Allocates reg1 amount of heap memory bytes and stores pointer to reg0
+	alloc reg0, reg1; <=> Allocates reg1 amount of heap memory bytes and stores pointer to reg0
 	Syscall; syscall reg0, reg1 | Performs syscall pointed by reg1 and stores return value to reg0
 ```
 
