@@ -1,5 +1,5 @@
 ﻿# NanoVM
-Embeddable lightweight x64 register based VM implementation
+Embeddable lightweight x64 register based VM implementation written in C.
 
 ### Table of contents
 
@@ -194,6 +194,17 @@ Where reg0 will receive the syscall return value and 1 defines what syscall numb
 #### Recommended syscall contract
 
 Use reg4-reg6 as first arguments for the syscall to avoid having to push/pop stack memory for functions with low amount of arguments. For more arguments, use NanoVM stack pop functionality, and for pointers to memory use the NanoVM read/write memory helpers as they will ensure memory operations stay within VM memory bounds.
+
+
+## Heap memory
+
+NanoVM supports heap memory through 'alloc' and 'free' opcodes. As initial version a simple bump list allocator is used => free opcode is no-op.
+
+```asm
+alloc reg0, 500 ;allocate 500 bytes in heap
+store reg0, 123 ;write to heap
+free reg0 ;free heap memory allocation
+```
 
 # NanoAssembler
 NanoAssembler is currently a rough assembler implementation for NanoVM. The assembler was made to aid in making simple programs and tests. This project is not so much about making a "programming language" but rather the core VM which could be used as the base which some programming language is compiled to. Proper assembler should implement lexer, parser and assembler but the assembler is lower priority for this project.
